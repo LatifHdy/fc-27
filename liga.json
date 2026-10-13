@@ -233,9 +233,9 @@
       "id": 27,
       "home": "Fajrul",
       "away": "Ardi",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 9,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 28,
