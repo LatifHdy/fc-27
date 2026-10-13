@@ -145,17 +145,17 @@
       "id": 16,
       "home": "Latif",
       "away": "Teguh",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 0,
+      "awayScore": 7,
+      "played": true
     },
     {
       "id": 17,
       "home": "Latif",
       "away": "Fajrul",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 6,
+      "played": true
     },
     {
       "id": 18,
