@@ -97,9 +97,9 @@
       "id": 10,
       "home": "Andre",
       "away": "Teguh",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 0,
+      "awayScore": 10,
+      "played": true
     },
     {
       "id": 11,
