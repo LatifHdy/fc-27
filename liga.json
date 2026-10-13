@@ -49,9 +49,9 @@
       "id": 4,
       "home": "Galang",
       "away": "Fajrul",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 8,
+      "awayScore": 5,
+      "played": true
     },
     {
       "id": 5,
