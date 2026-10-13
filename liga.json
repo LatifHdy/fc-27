@@ -89,9 +89,9 @@
       "id": 9,
       "home": "Andre",
       "away": "Latif",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 1,
+      "awayScore": 3,
+      "played": true
     },
     {
       "id": 10,
