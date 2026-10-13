@@ -1,0 +1,313 @@
+{
+  "league": {
+    "name": "FC 27 Liga",
+    "season": "Season 1",
+    "format": "Single Round Robin",
+    "teams": [
+      "Galang",
+      "Andre",
+      "Latif",
+      "Teguh",
+      "Fajrul",
+      "Ardi",
+      "swas",
+      "Sinar garut",
+      "Otry"
+    ],
+    "points": {
+      "win": 3,
+      "draw": 1,
+      "loss": 0
+    }
+  },
+  "matches": [
+    {
+      "id": 1,
+      "home": "Galang",
+      "away": "Andre",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 2,
+      "home": "Galang",
+      "away": "Latif",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 3,
+      "home": "Galang",
+      "away": "Teguh",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 4,
+      "home": "Galang",
+      "away": "Fajrul",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 5,
+      "home": "Galang",
+      "away": "Ardi",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 6,
+      "home": "Galang",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 7,
+      "home": "Galang",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 8,
+      "home": "Galang",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 9,
+      "home": "Andre",
+      "away": "Latif",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 10,
+      "home": "Andre",
+      "away": "Teguh",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 11,
+      "home": "Andre",
+      "away": "Fajrul",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 12,
+      "home": "Andre",
+      "away": "Ardi",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 13,
+      "home": "Andre",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 14,
+      "home": "Andre",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 15,
+      "home": "Andre",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 16,
+      "home": "Latif",
+      "away": "Teguh",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 17,
+      "home": "Latif",
+      "away": "Fajrul",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 18,
+      "home": "Latif",
+      "away": "Ardi",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 19,
+      "home": "Latif",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 20,
+      "home": "Latif",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 21,
+      "home": "Latif",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 22,
+      "home": "Teguh",
+      "away": "Fajrul",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 23,
+      "home": "Teguh",
+      "away": "Ardi",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 24,
+      "home": "Teguh",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 25,
+      "home": "Teguh",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 26,
+      "home": "Teguh",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 27,
+      "home": "Fajrul",
+      "away": "Ardi",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 28,
+      "home": "Fajrul",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 29,
+      "home": "Fajrul",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 30,
+      "home": "Fajrul",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 31,
+      "home": "Ardi",
+      "away": "swas",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 32,
+      "home": "Ardi",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 33,
+      "home": "Ardi",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 34,
+      "home": "swas",
+      "away": "Sinar garut",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 35,
+      "home": "swas",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 36,
+      "home": "Sinar garut",
+      "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    }
+  ]
+}

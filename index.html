@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FC 27 Liga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-noise"></div>
+      <div class="brand">
+        <div class="ball">⚽</div>
+        <div>
+          <div class="eyebrow">FC 27 • SEASON 01</div>
+          <h1>FC 27 <span>LIGA</span></h1>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn ghost" id="importBtn">Import JSON</button>
+        <button class="btn accent" id="exportBtn">↓ Simpan JSON</button>
+        <input type="file" id="fileInput" accept=".json" hidden>
+      </div>
+    </header>
+
+    <main>
+      <section class="top-grid">
+        <div class="intro card">
+          <div class="live-dot"><i></i> LIVE LEAGUE</div>
+          <h2>9 pemain.<br><strong>1 juara.</strong></h2>
+          <p>Format liga sekali bertemu. Masukkan skor pertandingan, klasemen akan dihitung otomatis.</p>
+          <div class="format">
+            <span>36</span><small>PERTANDINGAN</small>
+            <span>9</span><small>PEMAIN</small>
+            <span>3</span><small>PTS / WIN</small>
+          </div>
+        </div>
+
+        <div class="leaders card" id="leaders"></div>
+      </section>
+
+      <section class="card standings-card">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow dark">LEAGUE TABLE</div>
+            <h2>Klasemen</h2>
+          </div>
+          <div class="legend">
+            <span><b>W</b> Menang</span>
+            <span><b>D</b> Seri</span>
+            <span><b>L</b> Kalah</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Pemain</th><th>M</th><th>W</th><th>D</th><th>L</th><th>GM</th><th>GK</th><th>SG</th><th>PTS</th></tr>
+            </thead>
+            <tbody id="standings"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card matches-card">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow dark">MATCH CENTER</div>
+            <h2>Jadwal & Hasil</h2>
+          </div>
+          <div class="filters">
+            <button class="filter active" data-filter="all">Semua</button>
+            <button class="filter" data-filter="pending">Belum Main</button>
+            <button class="filter" data-filter="played">Selesai</button>
+            <button class="filter random-btn" id="randomBtn">↗ Acak Pertandingan</button>
+          </div>
+        </div>
+        <div class="matches" id="matches"></div>
+        <div class="notifications" id="notifications"></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>FC 27 LIGA</span>
+      <span>Data disimpan dalam <strong>liga.json</strong></span>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
