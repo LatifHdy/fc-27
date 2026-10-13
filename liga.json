@@ -33,9 +33,9 @@
       "id": 2,
       "home": "Galang",
       "away": "Latif",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 4,
+      "awayScore": 2,
+      "played": true
     },
     {
       "id": 3,
