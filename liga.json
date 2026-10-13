@@ -113,9 +113,9 @@
       "id": 12,
       "home": "Andre",
       "away": "Ardi",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 9,
+      "played": true
     },
     {
       "id": 13,
