@@ -130,9 +130,9 @@
       "id": 14,
       "home": "Andre",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 1,
+      "played": true
     },
     {
       "id": 15,
