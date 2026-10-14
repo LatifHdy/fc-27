@@ -306,9 +306,9 @@
       "id": 36,
       "home": "Sinar garut",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 4,
+      "awayScore": 5,
+      "played": true
     },
     {
       "id": 37,
