@@ -370,9 +370,9 @@
       "id": 44,
       "home": "Sinar garut",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 1,
+      "awayScore": 1,
+      "played": true
     },
     {
       "id": 45,
