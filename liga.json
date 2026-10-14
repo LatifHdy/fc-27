@@ -378,9 +378,9 @@
       "id": 45,
       "home": "Otry",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 0,
+      "played": true
     }
   ]
 }
