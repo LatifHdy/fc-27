@@ -12,7 +12,8 @@
       "Ardi",
       "swas",
       "Sinar garut",
-      "Otry"
+      "Otry",
+      "Maulana Khar"
     ],
     "points": {
       "win": 3,
@@ -305,6 +306,78 @@
       "id": 36,
       "home": "Sinar garut",
       "away": "Otry",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 37,
+      "home": "Galang",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 38,
+      "home": "Andre",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 39,
+      "home": "Latif",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 40,
+      "home": "Teguh",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 41,
+      "home": "Fajrul",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 42,
+      "home": "Ardi",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 43,
+      "home": "swas",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 44,
+      "home": "Sinar garut",
+      "away": "Maulana Khar",
+      "homeScore": null,
+      "awayScore": null,
+      "played": false
+    },
+    {
+      "id": 45,
+      "home": "Otry",
+      "away": "Maulana Khar",
       "homeScore": null,
       "awayScore": null,
       "played": false

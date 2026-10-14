@@ -105,6 +105,12 @@ function renderNotifications(){
 }
 
 function render(){
+  const teamCount = league?.league?.teams?.length || 0;
+  const matchCount = league?.matches?.length || 0;
+  if($("#leagueSummaryTitle")) $("#leagueSummaryTitle").innerHTML = `${teamCount} pemain.<br><strong>1 juara.</strong>`;
+  if($("#totalMatchesStat")) $("#totalMatchesStat").textContent = matchCount;
+  if($("#totalTeamsStat")) $("#totalTeamsStat").textContent = teamCount;
+
   renderStandings(); renderLeaders(); renderMatches(); renderNotifications();
 }
 function renderStandings(){
