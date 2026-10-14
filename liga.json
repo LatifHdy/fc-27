@@ -106,9 +106,9 @@
       "id": 11,
       "home": "Andre",
       "away": "Fajrul",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 2,
+      "awayScore": 5,
+      "played": true
     },
     {
       "id": 12,
