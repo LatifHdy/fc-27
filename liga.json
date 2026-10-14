@@ -42,9 +42,9 @@
       "id": 3,
       "home": "Galang",
       "away": "Teguh",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 7,
+      "played": true
     },
     {
       "id": 4,
