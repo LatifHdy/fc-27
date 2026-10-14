@@ -177,9 +177,9 @@
       "id": 20,
       "home": "Latif",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 21,
