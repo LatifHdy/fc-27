@@ -322,9 +322,9 @@
       "id": 24,
       "home": "Teguh",
       "away": "swas",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 3,
+      "played": true
     },
     {
       "id": 28,
@@ -362,9 +362,9 @@
       "id": 19,
       "home": "Latif",
       "away": "swas",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 2,
+      "awayScore": 3,
+      "played": true
     },
     {
       "id": 6,
