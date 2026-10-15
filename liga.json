@@ -194,9 +194,9 @@
       "id": 25,
       "home": "Teguh",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 9,
+      "awayScore": 1,
+      "played": true
     },
     {
       "id": 26,
@@ -370,9 +370,9 @@
       "id": 6,
       "home": "Galang",
       "away": "swas",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 35,
