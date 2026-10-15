@@ -306,9 +306,9 @@
       "id": 30,
       "home": "Fajrul",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 31,
