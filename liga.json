@@ -162,9 +162,9 @@
       "id": 18,
       "home": "Latif",
       "away": "Ardi",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 1,
+      "played": true
     },
     {
       "id": 39,
@@ -290,9 +290,9 @@
       "id": 29,
       "home": "Fajrul",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 2,
+      "played": true
     },
     {
       "id": 23,
