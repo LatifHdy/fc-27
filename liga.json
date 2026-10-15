@@ -202,9 +202,9 @@
       "id": 26,
       "home": "Teguh",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 6,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 38,
