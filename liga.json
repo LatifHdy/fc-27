@@ -330,9 +330,9 @@
       "id": 28,
       "home": "Fajrul",
       "away": "swas",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 43,
