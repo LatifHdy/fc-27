@@ -314,9 +314,9 @@
       "id": 31,
       "home": "Ardi",
       "away": "swas",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 4,
+      "awayScore": 3,
+      "played": true
     },
     {
       "id": 24,
