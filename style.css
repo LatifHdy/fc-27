@@ -38,3 +38,75 @@ footer{display:flex;justify-content:space-between;padding:10px 22px;color:#999fa
 .notice.teguh{background:#edf9f2;border-color:#cfeedd}.notice.teguh .notice-icon{background:#c9f0d9}
 @media(max-width:900px){.notice-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.notice-grid{grid-template-columns:1fr}.notifications{margin:0 15px 20px}.random-btn{width:100%}}
+
+/* Section Subtitle */
+.section-hint{margin:4px 0 0;font-size:11px;color:var(--muted);font-weight:500}
+
+/* Clickable standings and podium */
+.standings-card tbody tr{cursor:pointer;transition:background .15s}
+.standings-card tbody tr:hover td{background:#faf9f2}
+.standings-card tbody tr.active-row td{background:#fff8dc!important}
+.team-cell{cursor:pointer}
+.team-cell strong{display:inline-flex;align-items:center;gap:6px}
+.team-cell .view-tag{font-size:8px;font-weight:800;letter-spacing:0.5px;color:#9aa0aa;background:#f0f1f4;padding:2px 6px;border-radius:6px;opacity:0;transition:opacity .15s}
+.standings-card tbody tr:hover .team-cell .view-tag{opacity:1}
+.podium .pod{cursor:pointer;transition:transform .15s, box-shadow .15s}
+.podium .pod:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.08)}
+
+/* Highlight Banner */
+.highlight-banner{display:flex;align-items:center;justify-content:space-between;background:#fff9df;border:1.5px solid #f5e5a4;border-radius:14px;padding:11px 18px;margin:0 25px 15px;gap:12px;font-size:12px;font-weight:700;color:#6b5700;animation:fadeIn .2s}
+.highlight-banner-text{display:flex;align-items:center;gap:8px}
+.highlight-banner-text strong{color:#111}
+.highlight-banner .clear-btn{border:0;background:var(--navy);color:white;padding:7px 14px;border-radius:8px;font-size:10px;font-weight:800;cursor:pointer;transition:background .15s}
+.highlight-banner .clear-btn:hover{background:#1e325c}
+
+/* Highlighted & Dimmed Matches */
+.match.is-highlighted{border:2px solid #f7c948!important;background:#fffdf2!important;box-shadow:0 0 0 3px rgba(247,201,72,0.3),0 8px 20px rgba(0,0,0,0.06)!important;transform:scale(1.01);z-index:2}
+.match.is-dimmed{opacity:0.25!important;filter:grayscale(0.6)}
+.match .side.highlight-player{color:#9e7000;font-weight:900}
+
+/* Modal Popup */
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,26,49,0.72);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.modal-backdrop.show{opacity:1;pointer-events:auto}
+.modal-card{background:#fff;width:100%;max-width:580px;max-height:88vh;border-radius:24px;box-shadow:0 25px 60px rgba(17,24,39,0.35);overflow-y:auto;padding:24px 26px;display:flex;flex-direction:column;gap:18px;animation:modalPop .25s cubic-bezier(0.16,1,0.3,1)}
+@keyframes modalPop{from{transform:scale(0.95) translateY(12px)}to{transform:scale(1) translateY(0)}}
+
+.modal-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:14px}
+.modal-player-info{display:flex;align-items:center;gap:14px}
+.modal-player-info .avatar{width:48px;height:48px;border-radius:15px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 6px 14px rgba(16,26,49,0.2)}
+.modal-player-info h2{margin:2px 0 0;font:700 32px/1 "Barlow Condensed"}
+.modal-close{border:0;background:#f2f2ef;width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;display:grid;place-items:center;color:#666;cursor:pointer;transition:.15s}
+.modal-close:hover{background:#e5e5e0;color:#111}
+
+.modal-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:#f7f7f4;border-radius:14px;padding:11px 8px;text-align:center}
+.stat-box small{display:block;font-size:8px;font-weight:800;color:#8890a0;text-transform:uppercase}
+.stat-box span{font:700 20px/1.2 "Barlow Condensed";color:var(--navy)}
+
+.modal-section{border:1px solid var(--line);border-radius:16px;padding:15px 16px;background:#fafaf8}
+.modal-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-title-wrap{display:flex;align-items:center;gap:8px}
+.section-title-wrap .sec-icon{font-size:16px}
+.section-title-wrap strong{display:block;font-size:11px;font-weight:800;letter-spacing:0.5px}
+.section-title-wrap small{display:block;font-size:9px;color:var(--muted)}
+.count-pill{background:#eef1f6;color:var(--navy);font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px}
+.count-pill.played{background:#def7ec;color:#03543f}
+
+.pending-opponents{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.opponent-chip{background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 11px;font-size:11px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 4px rgba(0,0,0,0.02)}
+.opponent-chip .vs-badge{font-size:9px;color:#9ba1ad;font-weight:800}
+
+.btn-highlight-matches{width:100%;padding:10px;border-radius:11px;font-size:11px;font-weight:800;text-align:center;cursor:pointer;border:0;background:var(--yellow);color:#161b28;display:flex;align-items:center;justify-content:center;gap:6px;transition:filter .15s}
+.btn-highlight-matches:hover{filter:brightness(1.06)}
+
+.modal-history-list{display:flex;flex-direction:column;gap:8px;max-height:210px;overflow-y:auto;padding-right:3px}
+.history-card{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 12px;font-size:11px}
+.history-teams{font-weight:700;display:flex;align-items:center;gap:6px}
+.history-teams .is-self{color:var(--navy);font-weight:800}
+.history-score{font:700 18px "Barlow Condensed";padding:2px 8px;background:#f5f5f2;border-radius:7px;letter-spacing:1px}
+.history-badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase}
+.history-badge.win{background:#def7ec;color:#03543f}
+.history-badge.loss{background:#fde8e8;color:#9b1c1c}
+.history-badge.draw{background:#fef08a;color:#713f12}
+.empty-notice{text-align:center;color:var(--muted);font-size:11px;padding:12px 0;font-style:italic}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}

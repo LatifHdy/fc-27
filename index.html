@@ -69,15 +69,17 @@
         <div class="section-head">
           <div>
             <div class="eyebrow dark">MATCH CENTER</div>
-            <h2>Jadwal & Hasil</h2>
+            <h2>Jadwal Pertandingan</h2>
+            <p class="section-hint">Klik nama pemain di Klasemen untuk melihat riwayat selesai & sisa lawan.</p>
           </div>
           <div class="filters">
-            <button class="filter active" data-filter="all">Semua</button>
-            <button class="filter" data-filter="pending">Belum Main</button>
-            <button class="filter" data-filter="played">Selesai</button>
+            <button class="filter active" data-filter="pending">Belum Main</button>
+            <button class="filter" data-filter="others">Pemain Lain</button>
+            <button class="filter" data-filter="swas">Jadwal Swas</button>
             <button class="filter random-btn" id="randomBtn">↗ Acak Pertandingan</button>
           </div>
         </div>
+        <div id="highlightBanner" class="highlight-banner" style="display:none"></div>
         <div class="matches" id="matches"></div>
         <div class="notifications" id="notifications"></div>
       </section>
@@ -88,6 +90,56 @@
       <span>Data disimpan dalam <strong>liga.json</strong></span>
     </footer>
   </div>
+
+  <!-- Modal Riwayat & Sisa Lawan Pemain -->
+  <div class="modal-backdrop" id="playerModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="avatar" id="modalAvatar">TG</div>
+          <div>
+            <div class="eyebrow dark" id="modalRank">POSISI 01</div>
+            <h2 id="modalPlayerName">Teguh</h2>
+          </div>
+        </div>
+        <button class="modal-close" id="modalCloseBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <div class="modal-stats" id="modalStats"></div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">⚔️</span>
+            <div>
+              <strong>BELUM BERTANDING</strong>
+              <small>Lawan yang belum dihadapi</small>
+            </div>
+          </div>
+          <span class="count-pill" id="modalPendingCount">0 Lawan</span>
+        </div>
+        <div class="pending-opponents" id="modalPendingOpponents"></div>
+        <button class="btn-highlight-matches" id="modalHighlightBtn">
+          🎯 Highlight Pertandingan di Jadwal Bawah
+        </button>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">📜</span>
+            <div>
+              <strong>RIWAYAT PERTANDINGAN SELESAI</strong>
+              <small>Hasil skor yang sudah tuntas</small>
+            </div>
+          </div>
+          <span class="count-pill played" id="modalPlayedCount">0 Selesai</span>
+        </div>
+        <div class="modal-history-list" id="modalHistoryList"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

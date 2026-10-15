@@ -346,9 +346,9 @@
       "id": 34,
       "home": "swas",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 13,
