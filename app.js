@@ -14,6 +14,9 @@ async function boot(){
     const saved = localStorage.getItem("fc27-liga");
     league = saved ? JSON.parse(saved) : {league:{name:"FC 27 Liga",teams:[]},matches:[]};
   }
+  if(league && Array.isArray(league.matches)){
+    league.matches = organizeMatches(league.matches, false);
+  }
   render();
 }
 
@@ -40,10 +43,29 @@ function shuffle(array){
   return a;
 }
 
+function isSwasMatch(m){
+  const h = (m.home || "").toLowerCase().trim();
+  const a = (m.away || "").toLowerCase().trim();
+  return h === "swas" || a === "swas";
+}
+
+function organizeMatches(matches, doShuffle = false){
+  const played = matches.filter(m => m.played);
+  let unplayedOthers = matches.filter(m => !m.played && !isSwasMatch(m));
+  let unplayedSwas = matches.filter(m => !m.played && isSwasMatch(m));
+
+  if (doShuffle) {
+    unplayedOthers = shuffle(unplayedOthers);
+    unplayedSwas = shuffle(unplayedSwas);
+  }
+
+  return [...played, ...unplayedOthers, ...unplayedSwas];
+}
+
 function randomizeMatches(){
-  // Only randomize display/order, never alter home/away teams or saved scores.
-  league.matches = shuffle(league.matches);
-  persist("Jadwal pertandingan berhasil diacak.");
+  // Hanya acak pertandingan yang belum dimainkan. Pertandingan swas diacak dan diletakkan di akhir.
+  league.matches = organizeMatches(league.matches, true);
+  persist("Jadwal pertandingan yang belum main berhasil diacak (pertandingan swas diletakkan di akhir).");
 }
 
 function getLeagueNotifications(){
@@ -138,20 +160,21 @@ function renderLeaders(){
       </div>`:"").join("")}</div>`;
 }
 function renderMatches(){
-  const list=league.matches.filter(m=>filter==="all"||(filter==="played"?m.played:!m.played));
-  $("#matches").innerHTML=list.map(m=>`
-    <div class="match ${m.played?'played':''}">
+  const ordered = organizeMatches(league.matches, false);
+  const list = ordered.filter(m => filter === "all" || (filter === "played" ? m.played : !m.played));
+  $("#matches").innerHTML = list.map(m => `
+    <div class="match ${m.played ? 'played' : ''}${isSwasMatch(m) && !m.played ? ' pending-swas' : ''}">
       <div class="side">${esc(m.home)}</div>
       <div class="scorebox">
         <div class="scoreline">
-          <input class="score" inputmode="numeric" min="0" type="number" value="${m.played?m.homeScore:""}" placeholder="–" data-id="${m.id}" data-side="home">
+          <input class="score" inputmode="numeric" min="0" type="number" value="${m.played ? m.homeScore : ""}" placeholder="–" data-id="${m.id}" data-side="home">
           <span class="dash">-</span>
-          <input class="score" inputmode="numeric" min="0" type="number" value="${m.played?m.awayScore:""}" placeholder="–" data-id="${m.id}" data-side="away">
+          <input class="score" inputmode="numeric" min="0" type="number" value="${m.played ? m.awayScore : ""}" placeholder="–" data-id="${m.id}" data-side="away">
         </div>
-        <div class="vs">${m.played?'FULL TIME':'VS'}</div>
+        <div class="vs">${m.played ? 'FULL TIME' : 'VS'}</div>
       </div>
       <div class="side away">${esc(m.away)}</div>
-      <button class="save-score" data-save="${m.id}">${m.played?'UPDATE HASIL':'SIMPAN HASIL'}</button>
+      <button class="save-score" data-save="${m.id}">${m.played ? 'UPDATE HASIL' : 'SIMPAN HASIL'}</button>
     </div>`).join("");
 }
 function saveMatch(id){
@@ -183,6 +206,14 @@ $("#randomBtn").addEventListener("click",randomizeMatches);
 $("#importBtn").addEventListener("click",()=>$("#fileInput").click());
 $("#fileInput").addEventListener("change",e=>{
   const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader();r.onload=()=>{try{league=JSON.parse(r.result);localStorage.setItem("fc27-liga",JSON.stringify(league));render();toast("liga.json berhasil di-import.")}catch{alert("File JSON tidak valid.")}};r.readAsText(f);
+  const r=new FileReader();r.onload=()=>{try{
+    league=JSON.parse(r.result);
+    if(league && Array.isArray(league.matches)){
+      league.matches = organizeMatches(league.matches, false);
+    }
+    localStorage.setItem("fc27-liga",JSON.stringify(league));
+    render();
+    toast("liga.json berhasil di-import.")
+  }catch{alert("File JSON tidak valid.")}};r.readAsText(f);
 });
 boot();
