@@ -282,9 +282,9 @@
       "id": 33,
       "home": "Ardi",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 2,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 29,
