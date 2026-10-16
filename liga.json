@@ -266,9 +266,9 @@
       "id": 15,
       "home": "Andre",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 1,
+      "awayScore": 5,
+      "played": true
     },
     {
       "id": 5,
