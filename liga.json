@@ -210,9 +210,9 @@
       "id": 38,
       "home": "Andre",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 11,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 8,
