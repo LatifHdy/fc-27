@@ -242,9 +242,9 @@
       "id": 21,
       "home": "Latif",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 8,
+      "played": true
     },
     {
       "id": 42,
