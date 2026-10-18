@@ -178,9 +178,9 @@
       "id": 7,
       "home": "Galang",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 7,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 41,
@@ -218,9 +218,9 @@
       "id": 8,
       "home": "Galang",
       "away": "Otry",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 4,
+      "awayScore": 8,
+      "played": true
     },
     {
       "id": 37,
@@ -274,9 +274,9 @@
       "id": 5,
       "home": "Galang",
       "away": "Ardi",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 5,
+      "played": true
     },
     {
       "id": 33,
@@ -298,9 +298,9 @@
       "id": 23,
       "home": "Teguh",
       "away": "Ardi",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 2,
+      "played": true
     },
     {
       "id": 30,
