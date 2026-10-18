@@ -234,9 +234,9 @@
       "id": 32,
       "home": "Ardi",
       "away": "Sinar garut",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 4,
+      "played": true
     },
     {
       "id": 21,
