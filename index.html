@@ -6,7 +6,7 @@
   <title>FC 27 Liga</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,13 @@
     <header class="hero">
       <div class="hero-noise"></div>
       <div class="brand">
-        <div class="ball">⚽</div>
+        <div class="ball-badge">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+            <path d="M12 6.5l3.2 2.3-1.2 3.8H10l-1.2-3.8L12 6.5z" fill="#0d1b3e"/>
+            <path d="M12 2v4.5M19.5 7.5L15.2 8.8M21 16l-4.5-1.2M3 16l4.5-1.2M4.5 7.5l4.3 1.3M12 22v-4.5M7.5 19.5l2.5-3.5M16.5 19.5l-2.5-3.5" stroke="#0d1b3e" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <div>
           <div class="eyebrow" id="heroSeasonBadge">FC 27 • SEASON 01</div>
           <h1>FC 27 <span>LIGA</span></h1>
@@ -24,14 +30,9 @@
         <button class="btn accent next-season-trigger" id="headerNextSeasonBtn" style="display:none">⚡ Next Season</button>
         <button class="btn ghost sync-btn" id="firebaseBtn" title="Status & Pengaturan Firebase Realtime Database">
           <span class="sync-dot" id="firebaseSyncDot"></span>
-          <span id="firebaseSyncLabel">🔥 Firebase</span>
+          <span id="firebaseSyncLabel">🔥 Firebase Live</span>
         </button>
-        <button class="btn ghost sync-btn" id="githubSyncBtn" title="Atur sinkronisasi otomatis langsung ke GitHub repository">
-          <span class="sync-dot" id="headerSyncDot"></span>
-          <span id="headerSyncLabel">GitHub</span>
-        </button>
-        <button class="btn ghost" id="importBtn">Import</button>
-        <button class="btn accent" id="exportBtn">↓ Simpan JSON</button>
+        <button class="btn ghost" id="importBtn">Import JSON</button>
         <input type="file" id="fileInput" accept=".json" hidden>
       </div>
     </header>
@@ -39,61 +40,153 @@
     <main>
       <div id="seasonBanner" class="season-banner-container" style="display:none"></div>
 
-      <section class="top-grid">
-        <div class="intro card">
-          <div class="live-dot"><i></i> LIVE LEAGUE</div>
-          <h2 id="leagueSummaryTitle">10 pemain.<br><strong>1 juara.</strong></h2>
-          <p>Format liga sekali bertemu. Masukkan skor pertandingan, klasemen akan dihitung otomatis.</p>
-          <div class="format">
-            <span id="totalMatchesStat">45</span><small>PERTANDINGAN</small>
-            <span id="totalTeamsStat">10</span><small>PEMAIN</small>
-            <span>3</span><small>PTS / WIN</small>
-          </div>
-        </div>
+      <!-- Pajak.go.id Style: Sections Navigator Tabs -->
+      <nav class="navigator-tabs-container">
+        <div class="navigator-tabs" id="navigatorTabs">
+          <button class="nav-tab active" data-tab="standings">
+            <span class="tab-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="13" width="5" height="8" rx="1.5" fill="#3b82f6"/>
+                <rect x="9.5" y="6" width="5" height="15" rx="1.5" fill="#f59e0b"/>
+                <rect x="16" y="10" width="5" height="11" rx="1.5" fill="#10b981"/>
+              </svg>
+            </span>
+            <span class="tab-title">Klasemen</span>
+            <span class="tab-badge" id="tabTeamCountBadge">10 Tim</span>
+          </button>
 
-        <div class="leaders card" id="leaders"></div>
-      </section>
+          <button class="nav-tab" data-tab="matches">
+            <span class="tab-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M14.5 17.5L3 6V3h3l11.5 11.5M17.5 14.5L19 16l2-2-1.5-1.5M9.5 6.5L8 5 6 7l1.5 1.5" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9.5 17.5L21 6V3h-3L6.5 14.5M6.5 14.5L5 16l-2-2 1.5-1.5M14.5 6.5L16 5l2 2-1.5 1.5" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="tab-title">Jadwal Tanding</span>
+            <span class="tab-badge" id="tabPendingCountBadge">8 Sisa</span>
+          </button>
 
-      <section class="card standings-card">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow dark">LEAGUE TABLE</div>
-            <h2>Klasemen</h2>
-          </div>
-          <div class="legend">
-            <span><b>W</b> Menang</span>
-            <span><b>D</b> Seri</span>
-            <span><b>L</b> Kalah</span>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Pemain</th><th>M</th><th>W</th><th>D</th><th>L</th><th>GM</th><th>GK</th><th>SG</th><th>PTS</th></tr>
-            </thead>
-            <tbody id="standings"></tbody>
-          </table>
-        </div>
-      </section>
+          <button class="nav-tab" data-tab="history">
+            <span class="tab-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="3" width="16" height="18" rx="2" fill="#8b5cf6" opacity="0.15"/>
+                <rect x="4" y="3" width="16" height="18" rx="2" stroke="#8b5cf6" stroke-width="2"/>
+                <path d="M8 8h8M8 12h8M8 16h5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="tab-title">Riwayat Hasil</span>
+            <span class="tab-badge" id="tabPlayedCountBadge">37 Selesai</span>
+          </button>
 
-      <section class="card matches-card">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow dark">MATCH CENTER</div>
-            <h2>Jadwal Pertandingan</h2>
-            <p class="section-hint">Klik nama pemain di Klasemen untuk melihat riwayat selesai & sisa lawan.</p>
-          </div>
-          <div class="filters">
-            <button class="filter active" data-filter="pending">Belum Main</button>
-            <button class="filter" data-filter="others">Pemain Lain</button>
-            <button class="filter" data-filter="swas">Jadwal Swas</button>
-            <button class="filter random-btn" id="randomBtn">↗ Acak Pertandingan</button>
-          </div>
+          <button class="nav-tab" data-tab="alerts">
+            <span class="tab-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M4 18h16l-2-10-4 4-2-6-2 6-4-4-2 10z" fill="#fde68a" stroke="#f59e0b" stroke-width="1.5"/>
+                <circle cx="12" cy="6" r="1.5" fill="#f59e0b"/>
+                <circle cx="4" cy="8" r="1.5" fill="#ef4444"/>
+                <circle cx="20" cy="8" r="1.5" fill="#3b82f6"/>
+              </svg>
+            </span>
+            <span class="tab-title">Info & Alerts</span>
+            <span class="tab-badge alert" id="tabAlertBadge">4 Info</span>
+          </button>
+
+          <button class="nav-tab nav-tab-all" data-tab="all">
+            <span class="tab-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="7" height="7" rx="2" fill="#3b82f6" />
+                <rect x="14" y="3" width="7" height="7" rx="2" fill="#10b981" />
+                <rect x="3" y="14" width="7" height="7" rx="2" fill="#f59e0b" />
+                <rect x="14" y="14" width="7" height="7" rx="2" fill="#8b5cf6" />
+              </svg>
+            </span>
+            <span class="tab-title">Semua</span>
+          </button>
         </div>
-        <div id="highlightBanner" class="highlight-banner" style="display:none"></div>
-        <div class="matches" id="matches"></div>
-        <div class="notifications" id="notifications"></div>
-      </section>
+      </nav>
+
+      <!-- Panel 1: Klasemen & Podium -->
+      <div class="tab-panel active" id="panelStandings">
+        <section class="top-grid">
+          <div class="intro card">
+            <div class="live-dot"><i></i> LIVE LEAGUE</div>
+            <h2 id="leagueSummaryTitle">10 pemain.<br><strong>1 juara.</strong></h2>
+            <p>Format liga sekali bertemu. Masukkan skor pertandingan, klasemen akan dihitung otomatis.</p>
+            <div class="format">
+              <span id="totalMatchesStat">45</span><small>PERTANDINGAN</small>
+              <span id="totalTeamsStat">10</span><small>PEMAIN</small>
+              <span>3</span><small>PTS / WIN</small>
+            </div>
+          </div>
+
+          <div class="leaders card" id="leaders"></div>
+        </section>
+
+        <section class="card standings-card">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow dark">LEAGUE TABLE</div>
+              <h2>Klasemen</h2>
+            </div>
+            <div class="legend">
+              <span><b>W</b> Menang</span>
+              <span><b>D</b> Seri</span>
+              <span><b>L</b> Kalah</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Pemain</th><th>M</th><th>W</th><th>D</th><th>L</th><th>GM</th><th>GK</th><th>SG</th><th>PTS</th></tr>
+              </thead>
+              <tbody id="standings"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Panel 2: Match Center -->
+      <div class="tab-panel" id="panelMatches">
+        <section class="card matches-card">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow dark">MATCH CENTER</div>
+              <h2>Jadwal Pertandingan</h2>
+              <p class="section-hint">Masukkan skor lalu klik SIMPAN HASIL (Verifikasi PIN 1203).</p>
+            </div>
+            <div class="filters">
+              <button class="filter active" data-filter="pending">Belum Main</button>
+              <button class="filter" data-filter="others">Pemain Lain</button>
+              <button class="filter" data-filter="swas">Jadwal Swas</button>
+              <button class="filter random-btn" id="randomBtn">↗ Acak Pertandingan</button>
+            </div>
+          </div>
+          <div id="highlightBanner" class="highlight-banner" style="display:none"></div>
+          <div class="matches" id="matches"></div>
+        </section>
+      </div>
+
+      <!-- Panel 3: Riwayat Pertandingan Selesai (Fitur Edit Skor) -->
+      <div class="tab-panel" id="panelHistory">
+        <section class="card history-section-card">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow dark">MATCH ARCHIVE &amp; SCORE EDIT</div>
+              <h2>Riwayat Pertandingan Selesai</h2>
+              <p class="section-hint">Klik tombol <strong>✏️ Edit Skor</strong> untuk merevisi skor jika terjadi kesalahan input (memerlukan PIN 1203).</p>
+            </div>
+            <span class="count-pill played" id="historySectionCount">0 Pertandingan</span>
+          </div>
+          <div class="history-grid-container" id="historyGrid"></div>
+        </section>
+      </div>
+
+      <!-- Panel 4: Notifikasi & Info Liga -->
+      <div class="tab-panel" id="panelAlerts">
+        <section class="card alerts-section-card">
+          <div class="notifications" id="notifications"></div>
+        </section>
+      </div>
     </main>
 
     <footer>
@@ -223,68 +316,6 @@
     </div>
   </div>
 
-  <!-- Modal GitHub Sync & Auto-Update -->
-  <div class="modal-backdrop" id="githubSyncModal" hidden>
-    <div class="modal-card">
-      <div class="modal-head">
-        <div class="modal-player-info">
-          <div class="avatar" style="background:#24292f;color:#fff">🐙</div>
-          <div>
-            <div class="eyebrow dark">AUTO-UPDATE GITHUB PAGES</div>
-            <h2>Sinkronisasi GitHub</h2>
-          </div>
-        </div>
-        <button class="modal-close" id="closeGithubSyncBtn" aria-label="Tutup">&times;</button>
-      </div>
-
-      <div class="github-sync-desc">
-        <p>Dengan menghubungkan <strong>Personal Access Token (PAT)</strong> GitHub, setiap kali Anda klik <em>SIMPAN HASIL</em> atau <em>NEXT SEASON</em>, JavaScript di browser akan <strong>langsung meng-commit dan update file <code>liga.json</code> di repository GitHub secara otomatis</strong> tanpa perlu edit manual atau git push!</p>
-        <div class="sync-privacy-note">🔒 Token Anda disimpan aman hanya di <em>localStorage</em> browser Anda sendiri. Pengunjung publik tidak memiliki akses ke token ini.</div>
-      </div>
-
-      <div class="modal-section">
-        <div class="form-group">
-          <label for="ghTokenInput">GitHub Personal Access Token (PAT):</label>
-          <input type="password" id="ghTokenInput" class="input-text" placeholder="ghp_... atau github_pat_...">
-          <small class="form-hint">Buat token di: <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">GitHub &gt; Settings &gt; Developer Settings &gt; Personal access tokens</a> (beri izin centang: <code>repo</code>).</small>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="ghRepoInput">Repository:</label>
-            <input type="text" id="ghRepoInput" class="input-text" value="LatifHdy/fc-27" placeholder="Owner/Repo">
-          </div>
-          <div class="form-group" style="width: 100px;">
-            <label for="ghBranchInput">Branch:</label>
-            <input type="text" id="ghBranchInput" class="input-text" value="main" placeholder="main">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="ghPathInput">Path File JSON:</label>
-          <input type="text" id="ghPathInput" class="input-text" value="liga.json" placeholder="liga.json">
-        </div>
-
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="ghAutoCommitCheck" checked>
-            <span>Otomatis commit ke GitHub setiap kali klik "SIMPAN HASIL"</span>
-          </label>
-        </div>
-      </div>
-
-      <div id="ghSyncStatusMessage" class="sync-status-box" style="display:none"></div>
-
-      <div class="modal-actions-bar">
-        <button class="btn ghost text-danger" id="ghRemoveTokenBtn" style="display:none">Hapus Token</button>
-        <div style="display:flex;gap:8px;margin-left:auto">
-          <button class="btn ghost" id="ghTestBtn">🔍 Test Koneksi</button>
-          <button class="btn accent" id="ghSaveBtn">Simpan Pengaturan</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal Firebase Setup & Admin Control -->
   <div class="modal-backdrop" id="firebaseModal" hidden>
     <div class="modal-card modal-large">
@@ -319,54 +350,98 @@
         <p class="form-hint" style="margin:0">Gunakan tombol ini saat pertama kali menghubungkan Firebase agar seluruh 45 jadwal pertandingan & klasemen terisi di database cloud.</p>
       </div>
 
-      <!-- Mode Admin / Keamanan PIN -->
-      <div class="modal-section">
-        <div class="modal-section-title">
-          <div class="section-title-wrap">
-            <span class="sec-icon">🔐</span>
-            <div>
-              <strong>HAK AKSES ADMIN (PIN EDIT)</strong>
-              <small>Hanya admin yang memasukkan PIN yang bisa input skor & ganti musim</small>
-            </div>
-          </div>
-          <span class="count-pill" id="adminStatusPill">Terkunci</span>
+      <div class="modal-actions-bar">
+        <button class="btn ghost" id="closeFirebaseModalBottomBtn" style="margin-left:auto">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Verifikasi PIN Admin (PIN 1203) -->
+  <div class="modal-backdrop" id="pinModal" hidden>
+    <div class="modal-card pin-card">
+      <div class="pin-header">
+        <div class="multi-icon-badge lock-badge">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="10" width="18" height="12" rx="4" fill="url(#pinLockGrad)" stroke="#1e3a8a" stroke-width="1.5" />
+            <circle cx="12" cy="15" r="2" fill="#fff" />
+            <path d="M12 17v2" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+            <path d="M7 10V7a5 5 0 0110 0v3" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" />
+            <defs>
+              <linearGradient id="pinLockGrad" x1="3" y1="10" x2="21" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#2563eb" />
+                <stop offset="1" stop-color="#1d4ed8" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
-        <div class="form-row" style="align-items:center">
-          <div class="form-group flex-1" style="margin-bottom:0">
-            <input type="password" id="adminPinInput" class="input-text" placeholder="Masukkan PIN Admin (Default: 2727)">
-          </div>
-          <button class="btn accent" id="unlockAdminBtn" style="padding:10px 16px;white-space:nowrap">Buka Akses Admin</button>
-          <button class="btn ghost text-danger" id="lockAdminBtn" style="padding:10px 16px;white-space:nowrap;display:none">Kunci Kembali</button>
-        </div>
-        <small class="form-hint">PIN default adalah <code>2727</code> (bisa diubah di file <code>firebase-config.js</code>). Pengunjung tanpa PIN hanya bisa melihat klasemen dan jadwal secara live (read-only).</small>
+        <h3>Verifikasi PIN Admin</h3>
+        <p id="pinModalDescription">Masukkan PIN Admin untuk menyimpan hasil pertandingan.</p>
       </div>
 
-      <!-- Panduan Setup Firebase -->
-      <div class="modal-section" style="background:#fafafa">
-        <div class="modal-section-title">
-          <div class="section-title-wrap">
-            <span class="sec-icon">📋</span>
-            <div>
-              <strong>PANDUAN AKTIVASI FIREBASE (CUMA 3 MENIT)</strong>
-              <small>Gratis selamanya dari Google</small>
-            </div>
+      <div class="pin-input-wrap">
+        <input type="password" id="pinInputBox" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off">
+        <div id="pinErrorMsg" class="pin-error" style="display:none">PIN salah! Gunakan PIN 1203.</div>
+      </div>
+
+      <div class="pin-actions">
+        <button class="btn ghost" id="cancelPinBtn">Batal</button>
+        <button class="btn accent" id="submitPinBtn">Konfirmasi Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Skor Riwayat (Memerlukan PIN 1203) -->
+  <div class="modal-backdrop" id="editScoreModal" hidden>
+    <div class="modal-card edit-score-modal-card">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="multi-icon-badge edit-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" fill="#fef08a" stroke="#d97706" stroke-width="1.8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="eyebrow dark">KOREKSI HASIL PERTANDINGAN</div>
+            <h2>Edit Skor Riwayat</h2>
           </div>
         </div>
-        <ol style="margin:0;padding-left:18px;font-size:11px;line-height:1.7;color:#4b5563">
-          <li>Buka <a href="https://console.firebase.google.com/" target="_blank" rel="noopener"><strong>console.firebase.google.com</strong></a> dan login dengan akun Google Anda.</li>
-          <li>Klik <strong>Add Project</strong> (beri nama misal <code>fc27-liga</code>).</li>
-          <li>Di menu kiri, pilih <strong>Build &gt; Realtime Database</strong> &gt; klik <strong>Create Database</strong> (pilih lokasi Singapura/US).</li>
-          <li>Pada tab <strong>Rules</strong>, ubah menjadi:
-            <pre style="background:#24292f;color:#fff;padding:6px 10px;border-radius:6px;margin:4px 0;font-size:10px"><code>{ "rules": { ".read": true, ".write": true } }</code></pre>
-            lalu klik <strong>Publish</strong>.
-          </li>
-          <li>Klik ikon <strong>Gear ⚙️ (Project settings)</strong> &gt; di bagian <em>Your apps</em> pilih <strong>Web (&lt;/&gt;)</strong>.</li>
-          <li>Salin nilai konfigurasi tersebut ke dalam file <code>firebase-config.js</code> di project ini. Selesai!</li>
-        </ol>
+        <button class="modal-close" id="closeEditScoreBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <div class="edit-score-body">
+        <p class="section-hint">Perubahan skor akan langsung memperbarui klasemen & riwayat di Firebase secara realtime.</p>
+        
+        <div class="edit-match-banner">
+          <div class="edit-team home-side">
+            <div class="avatar" id="editHomeAvatar">HM</div>
+            <strong id="editHomeTeam">Home</strong>
+            <small>Kandang</small>
+          </div>
+
+          <div class="edit-score-inputs">
+            <input type="number" id="editHomeScore" min="0" class="score-input-large" inputmode="numeric">
+            <span class="vs-dash">-</span>
+            <input type="number" id="editAwayScore" min="0" class="score-input-large" inputmode="numeric">
+          </div>
+
+          <div class="edit-team away-side">
+            <div class="avatar" id="editAwayAvatar">AW</div>
+            <strong id="editAwayTeam">Away</strong>
+            <small>Tandang</small>
+          </div>
+        </div>
+
+        <div class="form-group pin-verify-group">
+          <label for="editScorePin">PIN Admin (Gunakan 1203):</label>
+          <input type="password" id="editScorePin" class="input-text" maxlength="4" placeholder="Ketik 1203..." inputmode="numeric">
+          <div id="editScoreError" class="pin-error" style="display:none">PIN salah! Gunakan PIN 1203.</div>
+        </div>
       </div>
 
       <div class="modal-actions-bar">
-        <button class="btn ghost" id="closeFirebaseModalBottomBtn" style="margin-left:auto">Tutup</button>
+        <button class="btn ghost" id="cancelEditScoreBtn">Batal</button>
+        <button class="btn accent" id="saveEditedScoreBtn">💾 Simpan Perubahan</button>
       </div>
     </div>
   </div>

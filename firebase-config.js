@@ -18,7 +18,3 @@ const firebaseConfig = {
   appId: "1:913594181145:web:015a25815edd4e1d0dec88",
   measurementId: "G-LM1786D77T"
 };
-
-// PIN Admin untuk mengunci hak edit (hanya admin yang tahu PIN ini yang bisa simpan skor / ganti musim)
-// Pengunjung biasa tetap bisa melihat klasemen & skor live secara realtime tanpa perlu PIN.
-const ADMIN_DEFAULT_PIN = "2727";
