@@ -22,6 +22,7 @@ async function boot(){
   initFirebase();
   initNavigatorTabs();
   initModalsAndEvents();
+  checkSecretUrlTrigger();
 
   if(!league){
     try{
@@ -1039,27 +1040,8 @@ function initModalsAndEvents(){
   });
   $("#confirmNextSeasonBtn").addEventListener("click", executeNextSeason);
 
-  // Randomize & Import events
+  // Randomize events
   $("#randomBtn").addEventListener("click", randomizeMatches);
-  $("#importBtn").addEventListener("click", () => $("#fileInput").click());
-  $("#fileInput").addEventListener("change", e => {
-    const f = e.target.files[0]; if(!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-      try {
-        league = JSON.parse(r.result);
-        if(league && Array.isArray(league.matches)){
-          league.matches = organizeMatches(league.matches, false);
-        }
-        localStorage.setItem("fc27-liga", JSON.stringify(league));
-        render();
-        toast("liga.json berhasil di-import.");
-      } catch {
-        alert("File JSON tidak valid.");
-      }
-    };
-    r.readAsText(f);
-  });
 
   // Modal Highlight button
   $("#modalHighlightBtn").addEventListener("click", () => {
@@ -1078,7 +1060,8 @@ function initModalsAndEvents(){
   $("#firebaseModal").addEventListener("click", e => {
     if(e.target === $("#firebaseModal")) closeFirebaseModal();
   });
-  $("#uploadToFirebaseBtn").addEventListener("click", uploadToFirebase);
+  const uploadBtn = $("#uploadToFirebaseBtn");
+  if(uploadBtn) uploadBtn.addEventListener("click", uploadToFirebase);
 
   // Global ESC Key Handler
   document.addEventListener("keydown", e => {
@@ -1166,21 +1149,70 @@ function closeFirebaseModal(){
   setTimeout(() => { modal.hidden = true; }, 200);
 }
 
-async function uploadToFirebase(){
-  if(!firebaseDb){
-    alert("Firebase belum aktif. Harap lengkapi file firebase-config.js terlebih dahulu.");
-    return;
-  }
-  if(!confirm("Upload seluruh data liga saat ini (termasuk jadwal & hasil skor) ke Firebase? Data di cloud Firebase akan diperbarui.")){
-    return;
-  }
+/* ==========================================================================
+   SECRET ADMIN FIREBASE UPLOAD (Hanya Lewat URL Khusus)
+   ========================================================================== */
+function checkSecretUrlTrigger(){
   try {
-    await firebaseDb.ref("liga").set(league);
-    toast("🎉 Data berhasil di-upload ke Firebase Realtime Database!");
-    updateFirebaseUI(true, "✅ Data berhasil di-upload & aktif secara Realtime!");
-  } catch(e){
-    alert("Gagal upload ke Firebase: " + e.message);
+    const urlParams = new URLSearchParams(window.location.search);
+    const secretKey = urlParams.get("upload") || urlParams.get("upload_firebase") || urlParams.get("admin_upload");
+    
+    if(secretKey === ADMIN_PIN){
+      // Bersihkan parameter dari URL address bar agar tetap rahasia
+      const cleanUrl = window.location.pathname + (window.location.hash || "");
+      window.history.replaceState({}, document.title, cleanUrl);
+      
+      setTimeout(() => {
+        executeSecretFirebaseUpload();
+      }, 500);
+    }
+  } catch(e) {
+    console.warn("Secret URL check error:", e);
   }
 }
+
+async function executeSecretFirebaseUpload(){
+  const confirmed = confirm("🔐 [Secret Admin Trigger: PIN 1203 Terverifikasi]\n\nApakah Anda ingin meng-upload data liga.json terbaru ke cloud Firebase Realtime Database sekarang?");
+  if(!confirmed) return;
+
+  try {
+    let dataToUpload = null;
+    try {
+      const res = await fetch("liga.json?v=" + Date.now());
+      dataToUpload = await res.json();
+    } catch(err){
+      console.warn("Gagal fetch liga.json, menggunakan data memori:", err);
+      dataToUpload = league;
+    }
+
+    if(!firebaseDb && typeof firebase !== "undefined" && typeof firebaseConfig !== "undefined"){
+      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      firebaseDb = firebase.database();
+    }
+
+    if(firebaseDb && dataToUpload){
+      await firebaseDb.ref("liga").set(dataToUpload);
+      league = dataToUpload;
+      localStorage.setItem("fc27-liga", JSON.stringify(league));
+      render();
+      toast("🔥 [Secret Admin] Seluruh data liga.json BERHASIL di-upload ke Firebase!");
+      alert("✅ Sukses! Seluruh data liga.json terbaru telah di-upload ke Firebase Realtime Database.");
+    } else {
+      alert("⚠️ Firebase Realtime Database belum terinisialisasi. Cek koneksi & konfigurasi.");
+    }
+  } catch(e) {
+    console.error("Secret upload failed:", e);
+    alert("❌ Gagal upload ke Firebase: " + e.message);
+  }
+}
+
+// Opsi upload manual via konsol developer: uploadFirebase('1203')
+window.uploadFirebase = function(pin){
+  if(pin === ADMIN_PIN){
+    executeSecretFirebaseUpload();
+  } else {
+    alert("PIN salah! Gunakan PIN 1203.");
+  }
+};
 
 boot();

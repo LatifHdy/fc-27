@@ -32,8 +32,6 @@
           <span class="sync-dot" id="firebaseSyncDot"></span>
           <span id="firebaseSyncLabel">🔥 Firebase Live</span>
         </button>
-        <button class="btn ghost" id="importBtn">Import JSON</button>
-        <input type="file" id="fileInput" accept=".json" hidden>
       </div>
     </header>
 
@@ -333,21 +331,6 @@
       <div class="github-sync-desc" style="background:#fff9f0;border-color:#fde1b0">
         <p><strong>Database Real-Time Langsung Aktif di GitHub Pages!</strong> Setiap kali skor disimpan, semua teman yang sedang membuka web via HP atau PC akan langsung melihat perubahan skor & klasemen <strong>dalam 0,2 detik tanpa reload halaman</strong>.</p>
         <div id="firebaseConnectionBadge" class="sync-status-box success">Status: Memeriksa koneksi...</div>
-      </div>
-
-      <!-- Quick Action: Upload current liga.json to Firebase -->
-      <div class="modal-section" id="firebaseUploadSection">
-        <div class="modal-section-title">
-          <div class="section-title-wrap">
-            <span class="sec-icon">📤</span>
-            <div>
-              <strong>UPLOAD DATA AWAL KE FIREBASE</strong>
-              <small>Kirim data liga.json saat ini agar tersimpan di cloud Firebase</small>
-            </div>
-          </div>
-          <button class="btn accent" id="uploadToFirebaseBtn" style="font-size:11px;padding:8px 14px">Upload Sekarang</button>
-        </div>
-        <p class="form-hint" style="margin:0">Gunakan tombol ini saat pertama kali menghubungkan Firebase agar seluruh 45 jadwal pertandingan & klasemen terisi di database cloud.</p>
       </div>
 
       <div class="modal-actions-bar">

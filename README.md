@@ -38,7 +38,10 @@ Navigasi tab horizontal bergaya modern dengan ikon multi-color dan badge indikat
 ### 5. 🔥 Firebase Realtime Database
 - Data tersimpan dan tersinkronisasi otomatis secara real-time ke cloud Firebase.
 - Perubahan skor langsung terlihat oleh semua perangkat yang sedang membuka tautan tanpa perlu refresh.
-- Tombol ekspor manual "Simpan JSON" telah dihilangkan karena seluruh data tersimpan otomatis di Firebase & localStorage.
+- **Secret Admin Upload**: Tombol upload publik telah dihapus dari antarmuka web. Upload database awal ke cloud Firebase hanya dapat dilakukan secara rahasia melalui URL khusus admin:
+  - Buka web dengan parameter: `?upload=1203` (contoh: `http://localhost:8080/?upload=1203` atau di GitHub Pages `https://<domain>/?upload=1203`).
+  - Parameter URL akan langsung dihapus otomatis dari address bar setelah verifikasi demi menjaga kerahasiaan.
+  - Alternatif via console DevTools: `uploadFirebase('1203')`.
 
 ---
 

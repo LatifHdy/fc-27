@@ -138,15 +138,15 @@
       "id": 44,
       "home": "Sinar garut",
       "away": "Maulana Khar",
-      "homeScore": 1,
-      "awayScore": 1,
+      "homeScore": 3,
+      "awayScore": 0,
       "played": true
     },
     {
       "id": 45,
       "home": "Otry",
       "away": "Maulana Khar",
-      "homeScore": 5,
+      "homeScore": 3,
       "awayScore": 0,
       "played": true
     },
@@ -154,9 +154,9 @@
       "id": 40,
       "home": "Teguh",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 18,
@@ -170,9 +170,9 @@
       "id": 39,
       "home": "Latif",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 7,
@@ -186,9 +186,9 @@
       "id": 41,
       "home": "Fajrul",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 25,
@@ -210,7 +210,7 @@
       "id": 38,
       "home": "Andre",
       "away": "Maulana Khar",
-      "homeScore": 11,
+      "homeScore": 3,
       "awayScore": 0,
       "played": true
     },
@@ -226,9 +226,9 @@
       "id": 37,
       "home": "Galang",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 32,
@@ -250,7 +250,7 @@
       "id": 42,
       "home": "Ardi",
       "away": "Maulana Khar",
-      "homeScore": 11,
+      "homeScore": 3,
       "awayScore": 0,
       "played": true
     },
@@ -338,9 +338,9 @@
       "id": 43,
       "home": "swas",
       "away": "Maulana Khar",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 3,
+      "awayScore": 0,
+      "played": true
     },
     {
       "id": 34,
