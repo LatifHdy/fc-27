@@ -5,6 +5,10 @@ let selectedPlayer = null;
 let currentModalPlayer = null;
 let nextSeasonTeams = [];
 
+let firebaseDb = null;
+let isFirebaseLive = false;
+let isAdminUnlocked = localStorage.getItem("fc27-admin-unlocked") === "true";
+
 let githubConfig = {
   token: "",
   repo: "LatifHdy/fc-27",
@@ -19,13 +23,19 @@ const initials = n => n.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCas
 
 async function boot(){
   loadGithubConfig();
-  try{
-    const r = await fetch(DATA_URL + "?v=" + Date.now());
-    league = await r.json();
-  }catch(e){
-    const saved = localStorage.getItem("fc27-liga");
-    league = saved ? JSON.parse(saved) : {league:{name:"FC 27 Liga",teams:[]},matches:[]};
+  updateAdminUI();
+  initFirebase();
+
+  if(!league){
+    try{
+      const r = await fetch(DATA_URL + "?v=" + Date.now());
+      league = await r.json();
+    }catch(e){
+      const saved = localStorage.getItem("fc27-liga");
+      league = saved ? JSON.parse(saved) : {league:{name:"FC 27 Liga",teams:[]},matches:[]};
+    }
   }
+
   if(league && Array.isArray(league.matches)){
     league.matches = organizeMatches(league.matches, false);
   }
@@ -399,7 +409,44 @@ function renderMatches(){
   }).join("");
 }
 
+function requireAdmin(){
+  if(isAdminUnlocked) return true;
+  const entered = prompt("🔒 Masukkan PIN Admin untuk mengubah skor / memulai musim baru:");
+  if(!entered) return false;
+  const correctPin = (typeof ADMIN_DEFAULT_PIN !== "undefined" ? ADMIN_DEFAULT_PIN : "2727");
+  if(entered.trim() === correctPin.trim()){
+    isAdminUnlocked = true;
+    localStorage.setItem("fc27-admin-unlocked", "true");
+    updateAdminUI();
+    toast("🔓 Akses Admin berhasil dibuka!");
+    return true;
+  } else {
+    alert("PIN Admin salah! Akses ditolak.");
+    return false;
+  }
+}
+
+function updateAdminUI(){
+  const statusPill = $("#adminStatusPill");
+  const pinInput = $("#adminPinInput");
+  const unlockBtn = $("#unlockAdminBtn");
+  const lockBtn = $("#lockAdminBtn");
+
+  if(isAdminUnlocked){
+    if(statusPill){ statusPill.textContent = "Terbuka (Admin)"; statusPill.className = "count-pill played"; }
+    if(pinInput) pinInput.style.display = "none";
+    if(unlockBtn) unlockBtn.style.display = "none";
+    if(lockBtn) lockBtn.style.display = "inline-block";
+  } else {
+    if(statusPill){ statusPill.textContent = "Terkunci (Read-Only)"; statusPill.className = "count-pill"; }
+    if(pinInput) pinInput.style.display = "block";
+    if(unlockBtn) unlockBtn.style.display = "inline-block";
+    if(lockBtn) lockBtn.style.display = "none";
+  }
+}
+
 function saveMatch(id){
+  if(!requireAdmin()) return;
   const card = document.querySelector(`[data-save="${id}"]`).parentElement;
   const inputs = card.querySelectorAll(".score");
   const hs = inputs[0].value.trim(), as = inputs[1].value.trim();
@@ -413,6 +460,19 @@ async function persist(message="Hasil tersimpan. Klik “Simpan JSON” untuk me
   localStorage.setItem("fc27-liga", JSON.stringify(league));
   render();
 
+  // 1. Simpan ke Firebase Realtime Database jika aktif
+  if(firebaseDb){
+    try {
+      await firebaseDb.ref("liga").set(league);
+      toast(message + " (🔥 Tersimpan Realtime di Firebase!)");
+      return;
+    } catch(err){
+      console.warn("Gagal simpan ke Firebase:", err);
+      toast(message + ` (⚠️ Gagal simpan ke Firebase: ${err.message})`);
+    }
+  }
+
+  // 2. Fallback: Simpan ke GitHub API jika aktif
   if(githubConfig.token && githubConfig.autoCommit){
     toast("Menyimpan ke GitHub...");
     const res = await commitToGithub(league, "Update hasil liga [via Web App]");
@@ -421,9 +481,10 @@ async function persist(message="Hasil tersimpan. Klik “Simpan JSON” untuk me
     } else {
       toast(message + ` (⚠️ Gagal commit GitHub: ${res.message})`);
     }
-  } else {
-    toast(message);
+    return;
   }
+
+  toast(message);
 }
 
 function toast(msg){
@@ -639,6 +700,7 @@ function addTeamToNewSeason(){
 }
 
 async function executeNextSeason(){
+  if(!requireAdmin()) return;
   const seasonName = $("#nextSeasonInput").value.trim();
   if(!seasonName){
     alert("Harap masukkan nama musim baru (misal: Season 2).");
@@ -671,7 +733,7 @@ async function executeNextSeason(){
   // Otomatis download file liga.json baru
   downloadJSON();
 
-  // Simpan ke localStorage & GitHub (jika sync aktif)
+  // Simpan ke Firebase / localStorage / GitHub
   persist(`Selamat! ${seasonName} berhasil dibuat dengan ${newMatches.length} jadwal pertandingan.`);
 }
 
@@ -916,6 +978,144 @@ $("#newSeasonTeamsList").addEventListener("click", e => {
   }
 });
 $("#confirmNextSeasonBtn").addEventListener("click", executeNextSeason);
+
+// Firebase Realtime Database Integration
+function initFirebase(){
+  if(typeof firebase === "undefined"){
+    updateFirebaseUI(false, "SDK Firebase tidak termuat");
+    return;
+  }
+
+  if(typeof firebaseConfig === "undefined" || !firebaseConfig.apiKey || !firebaseConfig.databaseURL){
+    updateFirebaseUI(false, "Konfigurasi di firebase-config.js belum diisi");
+    return;
+  }
+
+  try {
+    if(!firebase.apps.length){
+      firebase.initializeApp(firebaseConfig);
+    }
+    firebaseDb = firebase.database();
+
+    firebaseDb.ref("liga").on("value", snapshot => {
+      const data = snapshot.val();
+      if(data && data.matches && data.league){
+        isFirebaseLive = true;
+        league = data;
+        if(Array.isArray(league.matches)){
+          league.matches = organizeMatches(league.matches, false);
+        }
+        localStorage.setItem("fc27-liga", JSON.stringify(league));
+        render();
+        updateFirebaseUI(true, "🟢 Terhubung Realtime ke Firebase Cloud");
+      } else {
+        isFirebaseLive = true;
+        updateFirebaseUI(true, "🟡 Terhubung (Database Firebase masih kosong)");
+      }
+    }, err => {
+      console.warn("Firebase listen error:", err);
+      updateFirebaseUI(false, `Error izin Firebase: ${err.message}`);
+    });
+  } catch(e){
+    console.error("Firebase init error:", e);
+    updateFirebaseUI(false, `Inisialisasi gagal: ${e.message}`);
+  }
+}
+
+function updateFirebaseUI(connected, message = ""){
+  const dot = $("#firebaseSyncDot");
+  const label = $("#firebaseSyncLabel");
+  const badge = $("#firebaseConnectionBadge");
+
+  if(dot){
+    dot.className = connected ? "sync-dot connected" : "sync-dot";
+  }
+  if(label){
+    label.textContent = connected ? "🔥 Live Firebase" : "🔥 Firebase";
+  }
+  if(badge){
+    badge.className = connected ? "sync-status-box success" : "sync-status-box error";
+    badge.textContent = connected ? (message || "✅ Terhubung Realtime ke Firebase") : (message || "⚠️ Belum Terhubung");
+  }
+}
+
+function openFirebaseModal(){
+  updateAdminUI();
+  const modal = $("#firebaseModal");
+  modal.hidden = false;
+  requestAnimationFrame(() => modal.classList.add("show"));
+}
+
+function closeFirebaseModal(){
+  const modal = $("#firebaseModal");
+  modal.classList.remove("show");
+  setTimeout(() => { modal.hidden = true; }, 200);
+}
+
+async function uploadToFirebase(){
+  if(!requireAdmin()) return;
+  if(!firebaseDb){
+    alert("Firebase belum aktif. Harap lengkapi file firebase-config.js terlebih dahulu.");
+    return;
+  }
+  if(!confirm("Upload seluruh data liga saat ini (termasuk 45 jadwal & hasil skor) ke Firebase? Data di Firebase akan diperbarui.")){
+    return;
+  }
+  try {
+    await firebaseDb.ref("liga").set(league);
+    toast("🎉 Data berhasil di-upload ke Firebase Realtime Database!");
+    updateFirebaseUI(true, "✅ Data berhasil di-upload & aktif secara Realtime!");
+  } catch(e){
+    alert("Gagal upload ke Firebase: " + e.message);
+  }
+}
+
+function unlockAdminManually(){
+  const pinInput = $("#adminPinInput");
+  const entered = pinInput.value.trim();
+  const correctPin = (typeof ADMIN_DEFAULT_PIN !== "undefined" ? ADMIN_DEFAULT_PIN : "2727");
+  if(entered === correctPin.trim()){
+    isAdminUnlocked = true;
+    localStorage.setItem("fc27-admin-unlocked", "true");
+    updateAdminUI();
+    toast("🔓 Akses Admin berhasil dibuka!");
+    pinInput.value = "";
+  } else {
+    alert("PIN Admin salah!");
+  }
+}
+
+function lockAdminManually(){
+  isAdminUnlocked = false;
+  localStorage.removeItem("fc27-admin-unlocked");
+  updateAdminUI();
+  toast("🔒 Akses Admin dikunci.");
+}
+
+// Event Listeners for Modals & Keys
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape"){
+    if(!$("#playerModal").hidden) closePlayerModal();
+    if(!$("#nextSeasonModal").hidden) closeNextSeasonModal();
+    if(!$("#githubSyncModal").hidden) closeGithubSyncModal();
+    if(!$("#firebaseModal").hidden) closeFirebaseModal();
+  }
+});
+
+// Firebase Modal triggers & events
+$("#firebaseBtn").addEventListener("click", openFirebaseModal);
+$("#closeFirebaseBtn").addEventListener("click", closeFirebaseModal);
+const closeFbBottomBtn = $("#closeFirebaseModalBottomBtn");
+if(closeFbBottomBtn) closeFbBottomBtn.addEventListener("click", closeFirebaseModal);
+$("#firebaseModal").addEventListener("click", e => {
+  if(e.target === $("#firebaseModal")) closeFirebaseModal();
+});
+$("#uploadToFirebaseBtn").addEventListener("click", uploadToFirebase);
+$("#unlockAdminBtn").addEventListener("click", unlockAdminManually);
+$("#lockAdminBtn").addEventListener("click", lockAdminManually);
+$("#adminPinInput").addEventListener("keydown", e => {
+  if(e.key === "Enter") unlockAdminManually();
+});
 
 // GitHub Sync triggers & events
 $("#githubSyncBtn").addEventListener("click", openGithubSyncModal);

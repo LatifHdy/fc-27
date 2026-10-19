@@ -22,11 +22,15 @@
       </div>
       <div class="hero-actions">
         <button class="btn accent next-season-trigger" id="headerNextSeasonBtn" style="display:none">⚡ Next Season</button>
+        <button class="btn ghost sync-btn" id="firebaseBtn" title="Status & Pengaturan Firebase Realtime Database">
+          <span class="sync-dot" id="firebaseSyncDot"></span>
+          <span id="firebaseSyncLabel">🔥 Firebase</span>
+        </button>
         <button class="btn ghost sync-btn" id="githubSyncBtn" title="Atur sinkronisasi otomatis langsung ke GitHub repository">
           <span class="sync-dot" id="headerSyncDot"></span>
-          <span id="headerSyncLabel">GitHub Sync</span>
+          <span id="headerSyncLabel">GitHub</span>
         </button>
-        <button class="btn ghost" id="importBtn">Import JSON</button>
+        <button class="btn ghost" id="importBtn">Import</button>
         <button class="btn accent" id="exportBtn">↓ Simpan JSON</button>
         <input type="file" id="fileInput" accept=".json" hidden>
       </div>
@@ -281,6 +285,96 @@
     </div>
   </div>
 
+  <!-- Modal Firebase Setup & Admin Control -->
+  <div class="modal-backdrop" id="firebaseModal" hidden>
+    <div class="modal-card modal-large">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="avatar" style="background:linear-gradient(135deg, #f5820d, #ffca28);color:#111">🔥</div>
+          <div>
+            <div class="eyebrow dark">REALTIME CLOUD DATABASE</div>
+            <h2>Firebase Realtime Database</h2>
+          </div>
+        </div>
+        <button class="modal-close" id="closeFirebaseBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <div class="github-sync-desc" style="background:#fff9f0;border-color:#fde1b0">
+        <p><strong>Database Real-Time Langsung Aktif di GitHub Pages!</strong> Setiap kali skor disimpan, semua teman yang sedang membuka web via HP atau PC akan langsung melihat perubahan skor & klasemen <strong>dalam 0,2 detik tanpa reload halaman</strong>.</p>
+        <div id="firebaseConnectionBadge" class="sync-status-box success">Status: Memeriksa koneksi...</div>
+      </div>
+
+      <!-- Quick Action: Upload current liga.json to Firebase -->
+      <div class="modal-section" id="firebaseUploadSection">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">📤</span>
+            <div>
+              <strong>UPLOAD DATA AWAL KE FIREBASE</strong>
+              <small>Kirim data liga.json saat ini agar tersimpan di cloud Firebase</small>
+            </div>
+          </div>
+          <button class="btn accent" id="uploadToFirebaseBtn" style="font-size:11px;padding:8px 14px">Upload Sekarang</button>
+        </div>
+        <p class="form-hint" style="margin:0">Gunakan tombol ini saat pertama kali menghubungkan Firebase agar seluruh 45 jadwal pertandingan & klasemen terisi di database cloud.</p>
+      </div>
+
+      <!-- Mode Admin / Keamanan PIN -->
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">🔐</span>
+            <div>
+              <strong>HAK AKSES ADMIN (PIN EDIT)</strong>
+              <small>Hanya admin yang memasukkan PIN yang bisa input skor & ganti musim</small>
+            </div>
+          </div>
+          <span class="count-pill" id="adminStatusPill">Terkunci</span>
+        </div>
+        <div class="form-row" style="align-items:center">
+          <div class="form-group flex-1" style="margin-bottom:0">
+            <input type="password" id="adminPinInput" class="input-text" placeholder="Masukkan PIN Admin (Default: 2727)">
+          </div>
+          <button class="btn accent" id="unlockAdminBtn" style="padding:10px 16px;white-space:nowrap">Buka Akses Admin</button>
+          <button class="btn ghost text-danger" id="lockAdminBtn" style="padding:10px 16px;white-space:nowrap;display:none">Kunci Kembali</button>
+        </div>
+        <small class="form-hint">PIN default adalah <code>2727</code> (bisa diubah di file <code>firebase-config.js</code>). Pengunjung tanpa PIN hanya bisa melihat klasemen dan jadwal secara live (read-only).</small>
+      </div>
+
+      <!-- Panduan Setup Firebase -->
+      <div class="modal-section" style="background:#fafafa">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">📋</span>
+            <div>
+              <strong>PANDUAN AKTIVASI FIREBASE (CUMA 3 MENIT)</strong>
+              <small>Gratis selamanya dari Google</small>
+            </div>
+          </div>
+        </div>
+        <ol style="margin:0;padding-left:18px;font-size:11px;line-height:1.7;color:#4b5563">
+          <li>Buka <a href="https://console.firebase.google.com/" target="_blank" rel="noopener"><strong>console.firebase.google.com</strong></a> dan login dengan akun Google Anda.</li>
+          <li>Klik <strong>Add Project</strong> (beri nama misal <code>fc27-liga</code>).</li>
+          <li>Di menu kiri, pilih <strong>Build &gt; Realtime Database</strong> &gt; klik <strong>Create Database</strong> (pilih lokasi Singapura/US).</li>
+          <li>Pada tab <strong>Rules</strong>, ubah menjadi:
+            <pre style="background:#24292f;color:#fff;padding:6px 10px;border-radius:6px;margin:4px 0;font-size:10px"><code>{ "rules": { ".read": true, ".write": true } }</code></pre>
+            lalu klik <strong>Publish</strong>.
+          </li>
+          <li>Klik ikon <strong>Gear ⚙️ (Project settings)</strong> &gt; di bagian <em>Your apps</em> pilih <strong>Web (&lt;/&gt;)</strong>.</li>
+          <li>Salin nilai konfigurasi tersebut ke dalam file <code>firebase-config.js</code> di project ini. Selesai!</li>
+        </ol>
+      </div>
+
+      <div class="modal-actions-bar">
+        <button class="btn ghost" id="closeFirebaseModalBottomBtn" style="margin-left:auto">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
