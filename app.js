@@ -3,12 +3,22 @@ let league = null;
 let filter = "pending";
 let selectedPlayer = null;
 let currentModalPlayer = null;
+let nextSeasonTeams = [];
+
+let githubConfig = {
+  token: "",
+  repo: "LatifHdy/fc-27",
+  branch: "main",
+  path: "liga.json",
+  autoCommit: true
+};
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const initials = n => n.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
 
 async function boot(){
+  loadGithubConfig();
   try{
     const r = await fetch(DATA_URL + "?v=" + Date.now());
     league = await r.json();
@@ -265,11 +275,14 @@ function renderNotifications(){
 function render(){
   const teamCount = league?.league?.teams?.length || 0;
   const matchCount = league?.matches?.length || 0;
+  const seasonName = league?.league?.season || "SEASON 01";
+  if($("#heroSeasonBadge")) $("#heroSeasonBadge").textContent = `FC 27 • ${seasonName}`.toUpperCase();
   if($("#leagueSummaryTitle")) $("#leagueSummaryTitle").innerHTML = `${teamCount} pemain.<br><strong>1 juara.</strong>`;
   if($("#totalMatchesStat")) $("#totalMatchesStat").textContent = matchCount;
   if($("#totalTeamsStat")) $("#totalTeamsStat").textContent = teamCount;
 
   renderStandings(); renderLeaders(); renderMatches(); renderNotifications();
+  renderSeasonBanner();
 }
 
 function renderStandings(){
@@ -344,7 +357,20 @@ function renderMatches(){
   }
 
   if(list.length === 0){
-    $("#matches").innerHTML = `<div class="empty-notice" style="grid-column:1/-1;padding:35px 20px;background:#fff;border-radius:14px;border:1px dashed var(--line);font-size:13px">Semua pertandingan pada daftar ini sudah selesai dimainkan! Silakan cek riwayat skor di tabel klasemen atas. 🎉</div>`;
+    const allDone = isSeasonFinished();
+    $("#matches").innerHTML = `
+      <div class="empty-notice" style="grid-column:1/-1;padding:35px 20px;background:#fff;border-radius:14px;border:1px dashed var(--line);font-size:13px;text-align:center">
+        ${allDone ? `
+          <div style="font-size:32px;margin-bottom:8px">🎉 🏆 🎉</div>
+          <strong style="display:block;font-size:16px;color:var(--navy);margin-bottom:6px">Semua Pertandingan Musim Ini Telah Selesai!</strong>
+          <p style="margin:0 0 16px;color:var(--muted);font-size:12px">Seluruh pertandingan telah dimainkan. Silakan mulai musim berikutnya untuk mengacak jadwal dan membuat file JSON baru.</p>
+          <button class="btn accent" id="emptyNoticeNextSeasonBtn" style="padding:11px 20px;font-weight:800;font-size:12px">⚡ Mulai Season Berikutnya</button>
+        ` : `
+          Semua pertandingan pada daftar ini sudah selesai dimainkan! Silakan cek riwayat skor di tabel klasemen atas. 🎉
+        `}
+      </div>`;
+    const emptyBtn = $("#emptyNoticeNextSeasonBtn");
+    if(emptyBtn) emptyBtn.addEventListener("click", openNextSeasonModal);
     return;
   }
 
@@ -383,10 +409,21 @@ function saveMatch(id){
   persist("Hasil tersimpan! Pertandingan berpindah ke riwayat klasemen.");
 }
 
-function persist(message="Hasil tersimpan. Klik “Simpan JSON” untuk memperbarui file liga.json."){
-  localStorage.setItem("fc27-liga",JSON.stringify(league));
+async function persist(message="Hasil tersimpan. Klik “Simpan JSON” untuk memperbarui file liga.json."){
+  localStorage.setItem("fc27-liga", JSON.stringify(league));
   render();
-  toast(message);
+
+  if(githubConfig.token && githubConfig.autoCommit){
+    toast("Menyimpan ke GitHub...");
+    const res = await commitToGithub(league, "Update hasil liga [via Web App]");
+    if(res.success){
+      toast(message + " (✅ Ter-update di GitHub!)");
+    } else {
+      toast(message + ` (⚠️ Gagal commit GitHub: ${res.message})`);
+    }
+  } else {
+    toast(message);
+  }
 }
 
 function toast(msg){
@@ -420,9 +457,397 @@ $("#playerModal").addEventListener("click", e => {
   if(e.target === $("#playerModal")) closePlayerModal();
 });
 document.addEventListener("keydown", e => {
-  if(e.key === "Escape" && !$("#playerModal").hidden) closePlayerModal();
+  if(e.key === "Escape"){
+    if(!$("#playerModal").hidden) closePlayerModal();
+    if(!$("#nextSeasonModal").hidden) closeNextSeasonModal();
+    if(!$("#githubSyncModal").hidden) closeGithubSyncModal();
+  }
 });
 
+// Season Completion & Next Season Logic
+function isSeasonFinished(){
+  return league && Array.isArray(league.matches) && league.matches.length > 0 && league.matches.every(m => m.played);
+}
+
+function renderSeasonBanner(){
+  const banner = $("#seasonBanner");
+  const headerBtn = $("#headerNextSeasonBtn");
+  const finished = isSeasonFinished();
+
+  if(headerBtn){
+    headerBtn.style.display = finished ? "inline-flex" : "none";
+  }
+
+  if(!banner) return;
+  if(!finished){
+    banner.style.display = "none";
+    banner.innerHTML = "";
+    return;
+  }
+
+  const rows = table();
+  const champion = rows[0] || { name: "-", pts: 0, gd: 0 };
+  const seasonName = league.league?.season || "Musim Ini";
+
+  banner.style.display = "block";
+  banner.innerHTML = `
+    <div class="champion-banner">
+      <div class="champion-banner-left">
+        <div class="trophy-badge">🏆</div>
+        <div class="champion-text">
+          <div class="eyebrow">${esc(seasonName).toUpperCase()} TELAH SELESAI</div>
+          <h2>JUARA LIGA: <span>${esc(champion.name)}</span></h2>
+          <p>Selamat kepada <strong>${esc(champion.name)}</strong> yang berhasil menjadi juara dengan <strong>${champion.pts} poin</strong> (SG ${champion.gd > 0 ? "+" : ""}${champion.gd}). Semua pertandingan tuntas!</p>
+        </div>
+      </div>
+      <div class="champion-banner-actions">
+        <button class="btn-next-season-hero" id="bannerNextSeasonBtn">⚡ Mulai Next Season</button>
+      </div>
+    </div>
+  `;
+
+  const bBtn = $("#bannerNextSeasonBtn");
+  if(bBtn) bBtn.addEventListener("click", openNextSeasonModal);
+}
+
+function getNextSeasonName(currentName = "Season 1"){
+  const match = currentName.match(/\d+/);
+  if(match){
+    const num = parseInt(match[0], 10) + 1;
+    return currentName.replace(/\d+/, num);
+  }
+  return currentName + " (Baru)";
+}
+
+function generateRoundRobin(teams){
+  const matches = [];
+  let id = 1;
+  const n = teams.length;
+  for(let i = 0; i < n; i++){
+    for(let j = i + 1; j < n; j++){
+      const isAlt = (i + j) % 2 === 1;
+      matches.push({
+        id: id++,
+        home: isAlt ? teams[i] : teams[j],
+        away: isAlt ? teams[j] : teams[i],
+        homeScore: 0,
+        awayScore: 0,
+        played: false
+      });
+    }
+  }
+  return organizeMatches(matches, false);
+}
+
+function openNextSeasonModal(){
+  const rows = table();
+  const seasonName = league.league?.season || "Season 1";
+  const nextName = getNextSeasonName(seasonName);
+  nextSeasonTeams = [...(league.league?.teams || [])];
+
+  $("#modalSeasonCompletedName").textContent = `${seasonName} Selesai (${league.matches.length} Pertandingan)`;
+  $("#nextSeasonInput").value = nextName;
+
+  const cRow = $("#championSummaryRow");
+  if(rows.length > 0){
+    const c1 = rows[0];
+    const c2 = rows[1];
+    const c3 = rows[2];
+    cRow.innerHTML = `
+      <div class="champ-card winner">
+        <div class="badge">👑</div>
+        <div class="champ-info">
+          <b>JUARA 1: ${esc(c1.name)}</b>
+          <small>${c1.pts} PTS &bull; ${c1.w}M ${c1.d}S ${c1.l}K &bull; SG ${c1.gd > 0 ? "+" : ""}${c1.gd}</small>
+        </div>
+      </div>
+      ${c2 ? `
+        <div class="champ-card runner-up">
+          <div class="badge">🥈</div>
+          <div class="champ-info">
+            <b>RUNNER-UP: ${esc(c2.name)}</b>
+            <small>${c2.pts} PTS &bull; SG ${c2.gd > 0 ? "+" : ""}${c2.gd}</small>
+          </div>
+        </div>
+      ` : ""}
+      ${c3 ? `
+        <div class="champ-card third-place">
+          <div class="badge">🥉</div>
+          <div class="champ-info">
+            <b>PERINGKAT 3: ${esc(c3.name)}</b>
+            <small>${c3.pts} PTS &bull; SG ${c3.gd > 0 ? "+" : ""}${c3.gd}</small>
+          </div>
+        </div>
+      ` : ""}
+    `;
+  }
+
+  renderNewSeasonTeams();
+
+  const modal = $("#nextSeasonModal");
+  modal.hidden = false;
+  requestAnimationFrame(() => modal.classList.add("show"));
+}
+
+function renderNewSeasonTeams(){
+  const container = $("#newSeasonTeamsList");
+  const countEl = $("#newSeasonTeamCount");
+  const matchCountEl = $("#newSeasonMatchCount");
+  const n = nextSeasonTeams.length;
+  const matchCount = Math.floor(n * (n - 1) / 2);
+
+  if(countEl) countEl.textContent = n;
+  if(matchCountEl) matchCountEl.textContent = matchCount;
+
+  container.innerHTML = nextSeasonTeams.map((t, idx) => `
+    <span class="team-chip-editable">
+      ${esc(t)}
+      <button class="btn-remove-team" data-remove-index="${idx}" title="Hapus pemain">&times;</button>
+    </span>
+  `).join("");
+}
+
+function closeNextSeasonModal(){
+  const modal = $("#nextSeasonModal");
+  modal.classList.remove("show");
+  setTimeout(() => { modal.hidden = true; }, 200);
+}
+
+function backupSeasonJson(){
+  const seasonTag = (league.league?.season || "season").toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const filename = `liga-${seasonTag}-final.json`;
+  const blob = new Blob([JSON.stringify(league, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Backup ${filename} berhasil diunduh.`);
+}
+
+function addTeamToNewSeason(){
+  const input = $("#newTeamInput");
+  const name = input.value.trim();
+  if(!name) return;
+  if(nextSeasonTeams.some(t => t.toLowerCase() === name.toLowerCase())){
+    alert(`Pemain "${name}" sudah ada dalam daftar.`);
+    return;
+  }
+  nextSeasonTeams.push(name);
+  input.value = "";
+  renderNewSeasonTeams();
+}
+
+async function executeNextSeason(){
+  const seasonName = $("#nextSeasonInput").value.trim();
+  if(!seasonName){
+    alert("Harap masukkan nama musim baru (misal: Season 2).");
+    return;
+  }
+  if(nextSeasonTeams.length < 2){
+    alert("Minimal butuh 2 pemain untuk membuat liga.");
+    return;
+  }
+
+  const matchCount = Math.floor(nextSeasonTeams.length * (nextSeasonTeams.length - 1) / 2);
+  const confirmMsg = `Mulai ${seasonName} dengan ${nextSeasonTeams.length} pemain (${matchCount} pertandingan)? Jadwal baru akan dibuat dan skor di-reset.`;
+  if(!confirm(confirmMsg)) return;
+
+  const newMatches = generateRoundRobin(nextSeasonTeams);
+  const newLeague = {
+    league: {
+      name: league.league?.name || "FC 27 Liga",
+      season: seasonName,
+      format: "Single Round Robin",
+      teams: [...nextSeasonTeams],
+      points: league.league?.points || { win: 3, draw: 1, loss: 0 }
+    },
+    matches: newMatches
+  };
+
+  league = newLeague;
+  closeNextSeasonModal();
+
+  // Otomatis download file liga.json baru
+  downloadJSON();
+
+  // Simpan ke localStorage & GitHub (jika sync aktif)
+  persist(`Selamat! ${seasonName} berhasil dibuat dengan ${newMatches.length} jadwal pertandingan.`);
+}
+
+// GitHub API Integration
+function loadGithubConfig(){
+  try{
+    const saved = localStorage.getItem("fc27-gh-config");
+    if(saved) githubConfig = { ...githubConfig, ...JSON.parse(saved) };
+  }catch(e){}
+  updateGithubSyncUI();
+}
+
+function saveGithubConfig(){
+  localStorage.setItem("fc27-gh-config", JSON.stringify(githubConfig));
+  updateGithubSyncUI();
+}
+
+function updateGithubSyncUI(){
+  const dot = $("#headerSyncDot");
+  const label = $("#headerSyncLabel");
+  const isConnected = !!githubConfig.token;
+  if(dot){
+    dot.className = isConnected ? "sync-dot connected" : "sync-dot";
+  }
+  if(label){
+    label.textContent = isConnected ? "GitHub Aktif" : "GitHub Sync";
+  }
+  const removeBtn = $("#ghRemoveTokenBtn");
+  if(removeBtn) removeBtn.style.display = isConnected ? "inline-block" : "none";
+}
+
+function utf8ToBase64(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))));
+}
+
+async function getGithubSha(){
+  if(!githubConfig.token) return null;
+  const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}&_=${Date.now()}`;
+  const res = await fetch(url, {
+    headers: {
+      "Authorization": `Bearer ${githubConfig.token.trim()}`,
+      "Accept": "application/vnd.github.v3+json"
+    }
+  });
+  if(!res.ok){
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Gagal mengambil metadata file (HTTP ${res.status})`);
+  }
+  const data = await res.json();
+  return data.sha;
+}
+
+async function commitToGithub(jsonData, commitMessage = "Update liga.json [via Web App]"){
+  if(!githubConfig.token){
+    return { success: false, message: "Token GitHub belum disetel." };
+  }
+  try {
+    const sha = await getGithubSha();
+    const contentEncoded = utf8ToBase64(JSON.stringify(jsonData, null, 2));
+    const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}`;
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${githubConfig.token.trim()}`,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: commitMessage,
+        content: contentEncoded,
+        sha: sha,
+        branch: githubConfig.branch
+      })
+    });
+
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    return { success: true, message: "Berhasil di-commit ke GitHub!" };
+  } catch(err) {
+    console.error("GitHub commit error:", err);
+    return { success: false, message: err.message };
+  }
+}
+
+function openGithubSyncModal(){
+  $("#ghTokenInput").value = githubConfig.token || "";
+  $("#ghRepoInput").value = githubConfig.repo || "LatifHdy/fc-27";
+  $("#ghBranchInput").value = githubConfig.branch || "main";
+  $("#ghPathInput").value = githubConfig.path || "liga.json";
+  $("#ghAutoCommitCheck").checked = !!githubConfig.autoCommit;
+
+  const statusMsg = $("#ghSyncStatusMessage");
+  if(statusMsg){
+    statusMsg.style.display = "none";
+    statusMsg.textContent = "";
+  }
+  updateGithubSyncUI();
+
+  const modal = $("#githubSyncModal");
+  modal.hidden = false;
+  requestAnimationFrame(() => modal.classList.add("show"));
+}
+
+function closeGithubSyncModal(){
+  const modal = $("#githubSyncModal");
+  modal.classList.remove("show");
+  setTimeout(() => { modal.hidden = true; }, 200);
+}
+
+function saveGithubSettings(){
+  githubConfig.token = $("#ghTokenInput").value.trim();
+  githubConfig.repo = $("#ghRepoInput").value.trim() || "LatifHdy/fc-27";
+  githubConfig.branch = $("#ghBranchInput").value.trim() || "main";
+  githubConfig.path = $("#ghPathInput").value.trim() || "liga.json";
+  githubConfig.autoCommit = $("#ghAutoCommitCheck").checked;
+
+  saveGithubConfig();
+  showGhStatus("Pengaturan GitHub berhasil disimpan!", "success");
+  toast("Pengaturan GitHub disimpan.");
+  setTimeout(closeGithubSyncModal, 900);
+}
+
+function removeGithubToken(){
+  if(confirm("Hapus token GitHub dari browser ini?")){
+    githubConfig.token = "";
+    saveGithubConfig();
+    $("#ghTokenInput").value = "";
+    showGhStatus("Token berhasil dihapus.", "success");
+    toast("Token GitHub dihapus.");
+  }
+}
+
+async function testGithubConnection(){
+  const token = $("#ghTokenInput").value.trim();
+  const repo = $("#ghRepoInput").value.trim();
+  const branch = $("#ghBranchInput").value.trim();
+  const path = $("#ghPathInput").value.trim();
+
+  if(!token){
+    showGhStatus("Harap isi Personal Access Token terlebih dahulu.", "error");
+    return;
+  }
+
+  showGhStatus("Menghubungkan ke GitHub API...", "info");
+  try {
+    const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}&_=${Date.now()}`;
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json"
+      }
+    });
+
+    if(res.ok){
+      const data = await res.json();
+      showGhStatus(`✅ Koneksi berhasil! Terhubung ke ${repo} (File: ${path}, SHA: ${data.sha.slice(0, 7)})`, "success");
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showGhStatus(`❌ Gagal: ${err.message || res.statusText} (Status: ${res.status})`, "error");
+    }
+  } catch(e){
+    showGhStatus(`❌ Terjadi kesalahan: ${e.message}`, "error");
+  }
+}
+
+function showGhStatus(msg, type){
+  const el = $("#ghSyncStatusMessage");
+  if(!el) return;
+  el.style.display = "block";
+  el.className = `sync-status-box ${type}`;
+  el.textContent = msg;
+}
+
+// Next Season & GitHub Modal Event Listeners
 $("#modalHighlightBtn").addEventListener("click", () => {
   if(currentModalPlayer) {
     const p = currentModalPlayer;
@@ -464,5 +889,42 @@ $("#fileInput").addEventListener("change", e => {
   };
   r.readAsText(f);
 });
+
+// Next Season triggers & events
+const headerNextBtn = $("#headerNextSeasonBtn");
+if(headerNextBtn) headerNextBtn.addEventListener("click", openNextSeasonModal);
+
+$("#closeNextSeasonBtn").addEventListener("click", closeNextSeasonModal);
+$("#cancelNextSeasonBtn").addEventListener("click", closeNextSeasonModal);
+$("#nextSeasonModal").addEventListener("click", e => {
+  if(e.target === $("#nextSeasonModal")) closeNextSeasonModal();
+});
+$("#backupCurrentSeasonBtn").addEventListener("click", backupSeasonJson);
+$("#addTeamBtn").addEventListener("click", addTeamToNewSeason);
+$("#newTeamInput").addEventListener("keydown", e => {
+  if(e.key === "Enter"){
+    e.preventDefault();
+    addTeamToNewSeason();
+  }
+});
+$("#newSeasonTeamsList").addEventListener("click", e => {
+  const btn = e.target.closest(".btn-remove-team");
+  if(btn && btn.dataset.removeIndex !== undefined){
+    const idx = parseInt(btn.dataset.removeIndex, 10);
+    nextSeasonTeams.splice(idx, 1);
+    renderNewSeasonTeams();
+  }
+});
+$("#confirmNextSeasonBtn").addEventListener("click", executeNextSeason);
+
+// GitHub Sync triggers & events
+$("#githubSyncBtn").addEventListener("click", openGithubSyncModal);
+$("#closeGithubSyncBtn").addEventListener("click", closeGithubSyncModal);
+$("#githubSyncModal").addEventListener("click", e => {
+  if(e.target === $("#githubSyncModal")) closeGithubSyncModal();
+});
+$("#ghSaveBtn").addEventListener("click", saveGithubSettings);
+$("#ghTestBtn").addEventListener("click", testGithubConnection);
+$("#ghRemoveTokenBtn").addEventListener("click", removeGithubToken);
 
 boot();

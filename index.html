@@ -16,11 +16,16 @@
       <div class="brand">
         <div class="ball">⚽</div>
         <div>
-          <div class="eyebrow">FC 27 • SEASON 01</div>
+          <div class="eyebrow" id="heroSeasonBadge">FC 27 • SEASON 01</div>
           <h1>FC 27 <span>LIGA</span></h1>
         </div>
       </div>
       <div class="hero-actions">
+        <button class="btn accent next-season-trigger" id="headerNextSeasonBtn" style="display:none">⚡ Next Season</button>
+        <button class="btn ghost sync-btn" id="githubSyncBtn" title="Atur sinkronisasi otomatis langsung ke GitHub repository">
+          <span class="sync-dot" id="headerSyncDot"></span>
+          <span id="headerSyncLabel">GitHub Sync</span>
+        </button>
         <button class="btn ghost" id="importBtn">Import JSON</button>
         <button class="btn accent" id="exportBtn">↓ Simpan JSON</button>
         <input type="file" id="fileInput" accept=".json" hidden>
@@ -28,6 +33,8 @@
     </header>
 
     <main>
+      <div id="seasonBanner" class="season-banner-container" style="display:none"></div>
+
       <section class="top-grid">
         <div class="intro card">
           <div class="live-dot"><i></i> LIVE LEAGUE</div>
@@ -136,6 +143,140 @@
           <span class="count-pill played" id="modalPlayedCount">0 Selesai</span>
         </div>
         <div class="modal-history-list" id="modalHistoryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Next Season -->
+  <div class="modal-backdrop" id="nextSeasonModal" hidden>
+    <div class="modal-card modal-large">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="avatar gold">🏆</div>
+          <div>
+            <div class="eyebrow dark" id="modalSeasonEyebrow">SELESAI • MUSIM BARU</div>
+            <h2 id="modalNextSeasonTitle">Mulai Season Berikutnya</h2>
+          </div>
+        </div>
+        <button class="modal-close" id="closeNextSeasonBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <!-- Recap Juara -->
+      <div class="modal-section champion-recap-box" id="modalChampionRecap">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">👑</span>
+            <div>
+              <strong>JUARA MUSIM INI</strong>
+              <small id="modalSeasonCompletedName">Musim Selesai</small>
+            </div>
+          </div>
+          <button class="btn-subtle" id="backupCurrentSeasonBtn">📥 Download Backup Season Ini (JSON)</button>
+        </div>
+        <div class="champion-summary-row" id="championSummaryRow"></div>
+      </div>
+
+      <!-- Konfigurasi Musim Baru -->
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">⚙️</span>
+            <div>
+              <strong>PENGATURAN MUSIM BARU</strong>
+              <small>Nama musim & daftar pemain yang berpartisipasi</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nextSeasonInput">Nama Musim (Season Baru):</label>
+          <input type="text" id="nextSeasonInput" class="input-text" placeholder="Contoh: Season 2">
+        </div>
+
+        <div class="form-group">
+          <div class="teams-header">
+            <label>Daftar Pemain (<span id="newSeasonTeamCount">0</span> Pemain &bull; <span id="newSeasonMatchCount">0</span> Pertandingan):</label>
+          </div>
+          <div class="new-season-teams" id="newSeasonTeamsList"></div>
+          
+          <div class="add-team-row">
+            <input type="text" id="newTeamInput" class="input-text" placeholder="Ketik nama pemain baru...">
+            <button class="btn ghost add-team-btn" id="addTeamBtn">+ Tambah</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Simpan & Eksekusi -->
+      <div class="next-season-actions">
+        <p class="next-season-hint">
+          ℹ️ Sistem akan mengacak & membuat jadwal pertandingan baru (skor 0-0). Data musim baru akan otomatis disimpan / dibuatkan file JSON baru.
+        </p>
+        <div class="action-buttons-group">
+          <button class="btn ghost" id="cancelNextSeasonBtn">Batal</button>
+          <button class="btn accent btn-generate-season" id="confirmNextSeasonBtn">🚀 Buat Jadwal & Mulai Season Baru</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal GitHub Sync & Auto-Update -->
+  <div class="modal-backdrop" id="githubSyncModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="avatar" style="background:#24292f;color:#fff">🐙</div>
+          <div>
+            <div class="eyebrow dark">AUTO-UPDATE GITHUB PAGES</div>
+            <h2>Sinkronisasi GitHub</h2>
+          </div>
+        </div>
+        <button class="modal-close" id="closeGithubSyncBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <div class="github-sync-desc">
+        <p>Dengan menghubungkan <strong>Personal Access Token (PAT)</strong> GitHub, setiap kali Anda klik <em>SIMPAN HASIL</em> atau <em>NEXT SEASON</em>, JavaScript di browser akan <strong>langsung meng-commit dan update file <code>liga.json</code> di repository GitHub secara otomatis</strong> tanpa perlu edit manual atau git push!</p>
+        <div class="sync-privacy-note">🔒 Token Anda disimpan aman hanya di <em>localStorage</em> browser Anda sendiri. Pengunjung publik tidak memiliki akses ke token ini.</div>
+      </div>
+
+      <div class="modal-section">
+        <div class="form-group">
+          <label for="ghTokenInput">GitHub Personal Access Token (PAT):</label>
+          <input type="password" id="ghTokenInput" class="input-text" placeholder="ghp_... atau github_pat_...">
+          <small class="form-hint">Buat token di: <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">GitHub &gt; Settings &gt; Developer Settings &gt; Personal access tokens</a> (beri izin centang: <code>repo</code>).</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="ghRepoInput">Repository:</label>
+            <input type="text" id="ghRepoInput" class="input-text" value="LatifHdy/fc-27" placeholder="Owner/Repo">
+          </div>
+          <div class="form-group" style="width: 100px;">
+            <label for="ghBranchInput">Branch:</label>
+            <input type="text" id="ghBranchInput" class="input-text" value="main" placeholder="main">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ghPathInput">Path File JSON:</label>
+          <input type="text" id="ghPathInput" class="input-text" value="liga.json" placeholder="liga.json">
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="ghAutoCommitCheck" checked>
+            <span>Otomatis commit ke GitHub setiap kali klik "SIMPAN HASIL"</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="ghSyncStatusMessage" class="sync-status-box" style="display:none"></div>
+
+      <div class="modal-actions-bar">
+        <button class="btn ghost text-danger" id="ghRemoveTokenBtn" style="display:none">Hapus Token</button>
+        <div style="display:flex;gap:8px;margin-left:auto">
+          <button class="btn ghost" id="ghTestBtn">🔍 Test Koneksi</button>
+          <button class="btn accent" id="ghSaveBtn">Simpan Pengaturan</button>
+        </div>
       </div>
     </div>
   </div>

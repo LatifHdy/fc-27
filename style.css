@@ -110,3 +110,84 @@ footer{display:flex;justify-content:space-between;padding:10px 22px;color:#999fa
 .empty-notice{text-align:center;color:var(--muted);font-size:11px;padding:12px 0;font-style:italic}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Champion & Season Completed Banner */
+.season-banner-container{margin-bottom:18px;animation:fadeIn .3s ease}
+.champion-banner{background:linear-gradient(135deg, #101a31 0%, #1f2d4e 65%, #382c0f 100%);color:#fff;border-radius:22px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;border:1.5px solid #f7c94866;box-shadow:0 14px 40px rgba(16,26,49,0.3),0 0 0 1px rgba(247,201,72,0.2);position:relative;overflow:hidden}
+.champion-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 50%, rgba(247,201,72,0.18), transparent 45%);pointer-events:none}
+.champion-banner-left{display:flex;align-items:center;gap:20px;position:relative;z-index:1}
+.trophy-badge{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg, #f7c948, #e5ab19);display:grid;place-items:center;font-size:32px;box-shadow:0 8px 24px rgba(247,201,72,0.35);animation:trophyBounce 3s ease-in-out infinite}
+@keyframes trophyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.champion-text .eyebrow{color:var(--yellow);letter-spacing:2px;font-size:11px}
+.champion-text h2{font:700 36px/1 "Barlow Condensed";margin:4px 0 6px;letter-spacing:0.5px}
+.champion-text h2 span{color:var(--yellow)}
+.champion-text p{margin:0;font-size:12px;color:#cbd3e1;max-width:520px;line-height:1.4}
+.champion-banner-actions{position:relative;z-index:1;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.btn-next-season-hero{background:var(--yellow);color:#121826;font-size:13px;font-weight:800;padding:14px 22px;border-radius:14px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 22px rgba(247,201,72,0.35);transition:transform .15s,filter .15s}
+.btn-next-season-hero:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.next-season-trigger{background:#f7c948!important;color:#111827!important;font-weight:800;border:0!important;box-shadow:0 4px 14px rgba(247,201,72,0.3)}
+
+/* Modal Large & Form elements */
+.modal-large{max-width:680px}
+.avatar.gold{background:linear-gradient(135deg, #f7c948, #d49a00);color:#161b28;font-size:22px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:0.3px}
+.input-text{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:10px 14px;font:inherit;font-size:13px;outline:none;background:#fff;transition:border-color .15s,box-shadow .15s}
+.input-text:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(16,26,49,0.08)}
+.form-hint{display:block;margin-top:5px;font-size:10px;color:var(--muted);line-height:1.4}
+.form-hint a{color:var(--navy);font-weight:700;text-decoration:underline}
+.form-row{display:flex;gap:12px}
+.flex-1{flex:1}
+.btn-subtle{background:none;border:1px solid #d2d6df;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:var(--navy);cursor:pointer;transition:all .15s}
+.btn-subtle:hover{background:#eef1f6;border-color:var(--navy)}
+
+/* Champion Recap in Modal */
+.champion-recap-box{background:linear-gradient(135deg, #fffdf2, #fbf7e6);border-color:#fae8a4}
+.champion-summary-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.champ-card{background:#fff;border:1px solid #f2e3af;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.champ-card.winner{grid-column:1/-1;background:#fff9e0;border-color:#edd584}
+.champ-card .badge{width:36px;height:36px;border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-weight:800;font-size:14px;color:#111}
+.champ-card.runner-up .badge{background:#e4e7ed;color:#555}
+.champ-card.third-place .badge{background:#eed8b7;color:#6b4412}
+.champ-info b{display:block;font-size:13px;color:var(--ink)}
+.champ-info small{color:var(--muted);font-size:10px;font-weight:600}
+
+/* Teams management in Next Season */
+.teams-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.new-season-teams{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;max-height:150px;overflow-y:auto;padding:2px}
+.team-chip-editable{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px 6px 12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+.team-chip-editable .btn-remove-team{border:0;background:#f0f1f4;color:#8790a0;border-radius:50%;width:18px;height:18px;font-size:12px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:all .15s}
+.team-chip-editable .btn-remove-team:hover{background:#ffdedd;color:#c02b28}
+.add-team-row{display:flex;gap:8px}
+.add-team-btn{border:1px dashed #c0c6d2!important;background:#fff!important;color:var(--navy)!important;font-size:12px;white-space:nowrap}
+.add-team-btn:hover{border-color:var(--navy)!important;background:#f5f6f9!important}
+.next-season-actions{border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:12px}
+.next-season-hint{margin:0;font-size:11px;color:var(--muted);line-height:1.4}
+.action-buttons-group{display:flex;justify-content:flex-end;gap:10px}
+.btn-generate-season{font-size:13px;padding:12px 20px}
+
+/* GitHub Sync UI */
+.sync-btn{display:inline-flex;align-items:center;gap:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#8b93a0;display:inline-block;transition:all .2s}
+.sync-dot.connected{background:#35b77b;box-shadow:0 0 0 3px rgba(53,183,123,0.3);animation:pulseDot 2s infinite}
+@keyframes pulseDot{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.github-sync-desc{background:#f8f9fb;border:1px solid #e7eaef;border-radius:14px;padding:14px 16px;font-size:12px;line-height:1.5;color:#4b5563}
+.github-sync-desc p{margin:0 0 8px}
+.sync-privacy-note{font-size:11px;color:#0b663b;background:#eefbf3;padding:6px 10px;border-radius:8px;font-weight:600}
+.checkbox-group{margin-top:14px}
+.checkbox-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer}
+.checkbox-label input{width:16px;height:16px;cursor:pointer}
+.sync-status-box{border-radius:10px;padding:10px 14px;font-size:11px;font-weight:700;margin-top:10px}
+.sync-status-box.success{background:#eefbf3;color:#03543f;border:1px solid #bcf0da}
+.sync-status-box.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.modal-actions-bar{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px;margin-top:10px}
+.text-danger{color:#dc2626!important;border-color:#fca5a5!important}
+.text-danger:hover{background:#fee2e2!important}
+
+@media(max-width:800px){
+  .champion-banner{flex-direction:column;align-items:flex-start}
+  .champion-banner-actions{width:100%}
+  .btn-next-season-hero{width:100%;justify-content:center}
+  .champion-summary-row{grid-template-columns:1fr}
+}
+
