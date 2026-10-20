@@ -2,6 +2,7 @@
   "league": {
     "name": "FC 27 Liga",
     "season": "Season 1",
+    "status": "active",
     "format": "Single Round Robin",
     "teams": [
       "Galang",
@@ -21,6 +22,7 @@
       "loss": 0
     }
   },
+  "historySeasons": [],
   "matches": [
     {
       "id": 1,

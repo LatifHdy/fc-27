@@ -27,7 +27,13 @@
         </div>
       </div>
       <div class="hero-actions">
-        <button class="btn accent next-season-trigger" id="headerNextSeasonBtn" style="display:none">⚡ Next Season</button>
+        <div class="season-switcher-wrap" id="seasonSwitcherWrap" title="Pilih Season untuk melihat Klasemen & Riwayat">
+          <span class="switcher-icon">🏆</span>
+          <select id="seasonSelect" class="season-select-box" aria-label="Pilih Musim Liga">
+            <option value="current">Season 1 (Aktif)</option>
+          </select>
+        </div>
+        <button class="btn accent btn-create-season-trigger" id="openCreateSeasonModalBtn">⚡ Buat Season Baru</button>
         <button class="btn ghost sync-btn" id="firebaseBtn" title="Status & Pengaturan Firebase Realtime Database">
           <span class="sync-dot" id="firebaseSyncDot"></span>
           <span id="firebaseSyncLabel">🔥 Firebase Live</span>
@@ -36,6 +42,7 @@
     </header>
 
     <main>
+      <div id="seasonStatusBanner" class="season-status-banner-wrap" style="display:none"></div>
       <div id="seasonBanner" class="season-banner-container" style="display:none"></div>
 
       <!-- Pajak.go.id Style: Sections Navigator Tabs -->
@@ -242,74 +249,141 @@
     </div>
   </div>
 
-  <!-- Modal Next Season -->
+  <!-- Modal Buat Season Baru & Konfigurasi Pemain -->
   <div class="modal-backdrop" id="nextSeasonModal" hidden>
     <div class="modal-card modal-large">
       <div class="modal-head">
         <div class="modal-player-info">
           <div class="avatar gold">🏆</div>
           <div>
-            <div class="eyebrow dark" id="modalSeasonEyebrow">SELESAI • MUSIM BARU</div>
-            <h2 id="modalNextSeasonTitle">Mulai Season Berikutnya</h2>
+            <div class="eyebrow dark" id="modalSeasonEyebrow">PENGATURAN MUSIM BARU</div>
+            <h2 id="modalNextSeasonTitle">Buat Season Baru</h2>
           </div>
         </div>
         <button class="modal-close" id="closeNextSeasonBtn" aria-label="Tutup">&times;</button>
       </div>
 
-      <!-- Recap Juara -->
-      <div class="modal-section champion-recap-box" id="modalChampionRecap">
+      <!-- Recap Juara Musim Sebelumnya (jika ada) -->
+      <div class="modal-section champion-recap-box" id="modalChampionRecap" style="display:none">
         <div class="modal-section-title">
           <div class="section-title-wrap">
             <span class="sec-icon">👑</span>
             <div>
               <strong>JUARA MUSIM INI</strong>
-              <small id="modalSeasonCompletedName">Musim Selesai</small>
+              <small id="modalSeasonCompletedName">Musim Telah Selesai</small>
             </div>
           </div>
-          <button class="btn-subtle" id="backupCurrentSeasonBtn">📥 Download Backup Season Ini (JSON)</button>
+          <button class="btn-subtle" id="backupCurrentSeasonBtn">📥 Download Backup Musim Ini (JSON)</button>
         </div>
         <div class="champion-summary-row" id="championSummaryRow"></div>
       </div>
 
-      <!-- Konfigurasi Musim Baru -->
+      <!-- Konfigurasi Nama Musim Baru -->
       <div class="modal-section">
         <div class="modal-section-title">
           <div class="section-title-wrap">
             <span class="sec-icon">⚙️</span>
             <div>
-              <strong>PENGATURAN MUSIM BARU</strong>
-              <small>Nama musim & daftar pemain yang berpartisipasi</small>
+              <strong>NAMA MUSIM (SEASON BARU)</strong>
+              <small>Tentukan nama kompetisi musim berikutnya</small>
             </div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="nextSeasonInput">Nama Musim (Season Baru):</label>
+        <div class="form-group" style="margin-bottom:0">
           <input type="text" id="nextSeasonInput" class="input-text" placeholder="Contoh: Season 2">
         </div>
+      </div>
 
-        <div class="form-group">
-          <div class="teams-header">
-            <label>Daftar Pemain (<span id="newSeasonTeamCount">0</span> Pemain &bull; <span id="newSeasonMatchCount">0</span> Pertandingan):</label>
+      <!-- Pilih Siapa Saja yang Ikut di Season Baru -->
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">👥</span>
+            <div>
+              <strong>SIAPA SAJA YANG IKUT DI SEASON BARU?</strong>
+              <small>Centang nama pemain yang akan berpartisipasi</small>
+            </div>
           </div>
-          <div class="new-season-teams" id="newSeasonTeamsList"></div>
-          
-          <div class="add-team-row">
-            <input type="text" id="newTeamInput" class="input-text" placeholder="Ketik nama pemain baru...">
-            <button class="btn ghost add-team-btn" id="addTeamBtn">+ Tambah</button>
+          <div class="selection-actions">
+            <button type="button" class="btn-subtle" id="selectAllPlayersBtn">Pilih Semua</button>
+            <button type="button" class="btn-subtle" id="deselectAllPlayersBtn">Kosongkan</button>
           </div>
+        </div>
+
+        <div class="player-selection-grid" id="participatingPlayersList"></div>
+
+        <div class="selection-summary-bar">
+          <span id="selectionSummaryText"><strong id="newSeasonTeamCount">0</strong> Pemain Terpilih &bull; <strong id="newSeasonMatchCount">0</strong> Pertandingan (Single Round Robin)</span>
+        </div>
+      </div>
+
+      <!-- Tambah Pemain Baru di Liga -->
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <div class="section-title-wrap">
+            <span class="sec-icon">➕</span>
+            <div>
+              <strong>TAMBAH PEMAIN BARU DI LIGA</strong>
+              <small>Daftarkan pemain baru yang belum ada di daftar di atas</small>
+            </div>
+          </div>
+        </div>
+        <div class="add-team-row">
+          <input type="text" id="newTeamInput" class="input-text" placeholder="Ketik nama pemain baru...">
+          <button class="btn ghost add-team-btn" id="addTeamBtn">+ Tambah Pemain</button>
+        </div>
+      </div>
+
+      <!-- Verifikasi PIN Admin -->
+      <div class="modal-section">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="createSeasonPinInput">PIN Admin (Gunakan PIN 1203):</label>
+          <input type="password" id="createSeasonPinInput" class="input-text" maxlength="4" placeholder="Ketik 1203..." inputmode="numeric">
+          <div id="createSeasonPinError" class="pin-error" style="display:none">PIN salah! Gunakan PIN 1203.</div>
         </div>
       </div>
 
       <!-- Status Simpan & Eksekusi -->
       <div class="next-season-actions">
         <p class="next-season-hint">
-          ℹ️ Sistem akan mengacak & membuat jadwal pertandingan baru (skor 0-0). Data musim baru akan otomatis disimpan / dibuatkan file JSON baru.
+          ℹ️ Musim baru akan dibuat dengan status <strong>DRAFT (BELUM DIMULAI)</strong>. Anda masih dapat menambah pemain sebelum klik <strong>Start Season</strong>. Musim sebelumnya akan diarsipkan secara otomatis ke Riwayat Season.
         </p>
         <div class="action-buttons-group">
           <button class="btn ghost" id="cancelNextSeasonBtn">Batal</button>
-          <button class="btn accent btn-generate-season" id="confirmNextSeasonBtn">🚀 Buat Jadwal & Mulai Season Baru</button>
+          <button class="btn accent btn-generate-season" id="confirmNextSeasonBtn">🚀 Buat Season Baru (Draft)</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Pemain di Season (Sebelum Berjalan) -->
+  <div class="modal-backdrop" id="addPlayerDraftModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-player-info">
+          <div class="avatar" style="background:#2563eb;color:#fff">➕</div>
+          <div>
+            <div class="eyebrow dark">TAMBAH PEMAIN SEBELUM MUSIM BERJALAN</div>
+            <h2>Tambah Pemain ke Liga</h2>
+          </div>
+        </div>
+        <button class="modal-close" id="closeAddPlayerDraftBtn" aria-label="Tutup">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label for="draftNewPlayerName">Nama Pemain Baru:</label>
+        <input type="text" id="draftNewPlayerName" class="input-text" placeholder="Ketik nama pemain...">
+      </div>
+
+      <div class="form-group">
+        <label for="draftAddPlayerPin">PIN Admin (Gunakan PIN 1203):</label>
+        <input type="password" id="draftAddPlayerPin" class="input-text" maxlength="4" placeholder="••••" inputmode="numeric">
+        <div id="draftAddPlayerPinError" class="pin-error" style="display:none">PIN salah! Gunakan PIN 1203.</div>
+      </div>
+
+      <div class="modal-actions-bar">
+        <button class="btn ghost" id="cancelAddPlayerDraftBtn">Batal</button>
+        <button class="btn accent" id="confirmAddPlayerDraftBtn">➕ Tambah &amp; Perbarui Jadwal</button>
       </div>
     </div>
   </div>
