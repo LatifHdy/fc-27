@@ -12,6 +12,7 @@ let createSeasonAllPlayers = [];
 let createSeasonSelected = new Set();
 
 let pendingSaveMatch = null;
+let editingMatch = null;
 let editingMatchId = null;
 
 // Individual Player Performance Tracker state
@@ -101,6 +102,34 @@ function getActiveSeasonData(){
   };
 }
 
+function getActiveSeasonMatches(){
+  if(viewingSeason === "current" || typeof viewingSeason !== "number"){
+    return league?.matches || [];
+  }
+  if(league?.historySeasons && league.historySeasons[viewingSeason]){
+    return league.historySeasons[viewingSeason].matches || [];
+  }
+  return league?.matches || [];
+}
+
+function updateSeasonStandingsAfterMatchChange(seasonIdx = viewingSeason){
+  if(typeof seasonIdx === "number" && league?.historySeasons && league.historySeasons[seasonIdx]){
+    const s = league.historySeasons[seasonIdx];
+    const rows = computeTableFor(s.teams || [], s.matches || []);
+    s.standings = rows;
+    s.champion = rows[0] ? { name: rows[0].name, pts: rows[0].pts, gd: rows[0].gd, w: rows[0].w, mp: rows[0].mp } : null;
+    s.runnerUp = rows[1] ? { name: rows[1].name, pts: rows[1].pts } : null;
+    s.thirdPlace = rows[2] ? { name: rows[2].name, pts: rows[2].pts } : null;
+    const allPlayed = s.matches.length > 0 && s.matches.every(m => m.played);
+    s.status = allPlayed ? "completed" : "active";
+  } else if(seasonIdx === "current" || typeof seasonIdx !== "number"){
+    if(league?.league && league.league.status !== "draft"){
+      const allPlayed = league.matches.length > 0 && league.matches.every(m => m.played);
+      league.league.status = allPlayed ? "completed" : "active";
+    }
+  }
+}
+
 function computeTableFor(teams, matches){
   if(!Array.isArray(teams)) return [];
   const rows = Object.fromEntries(teams.map(t=>[t,{name:t,mp:0,w:0,d:0,l:0,gf:0,ga:0,gd:0,pts:0}]));
@@ -120,9 +149,6 @@ function computeTableFor(teams, matches){
 
 function table(){
   const active = getActiveSeasonData();
-  if(active.isArchive && Array.isArray(active.standings) && active.standings.length > 0){
-    return active.standings;
-  }
   return computeTableFor(active.teams, active.matches);
 }
 
@@ -147,19 +173,20 @@ function organizeMatches(matches, doShuffle = false){
 }
 
 async function randomizeMatches(){
-  const active = getActiveSeasonData();
-  if(active.isArchive){
-    alert("Musim arsip tidak dapat diacak.");
-    return;
-  }
-
-  const unplayed = (league.matches || []).filter(m => !m.played);
+  const targetMatches = getActiveSeasonMatches();
+  const unplayed = targetMatches.filter(m => !m.played);
   if(unplayed.length === 0){
-    toast("Semua pertandingan sudah selesai dimainkan, tidak ada jadwal untuk diacak.");
+    toast("Semua pertandingan pada musim ini sudah selesai dimainkan, tidak ada jadwal untuk diacak.");
     return;
   }
 
-  league.matches = organizeMatches(league.matches, true);
+  const randomized = organizeMatches(targetMatches, true);
+  if(viewingSeason === "current" || typeof viewingSeason !== "number"){
+    league.matches = randomized;
+  } else if(league?.historySeasons && league.historySeasons[viewingSeason]){
+    league.historySeasons[viewingSeason].matches = randomized;
+  }
+
   await persist("🎲 Urutan jadwal pertandingan berhasil diacak dan tersimpan ke Firebase!");
 }
 
@@ -282,10 +309,10 @@ function openPlayerModal(playerName){
 
   $("#modalPendingCount").textContent = `${p.pendingOpponents.length} Lawan`;
   if(p.pendingOpponents.length === 0){
-    $("#modalPendingOpponents").innerHTML = `<div class="empty-notice">${p.isArchive ? 'Seluruh pertandingan musim ini telah selesai.' : 'Semua pertandingan sudah selesai! 🎉'}</div>`;
+    $("#modalPendingOpponents").innerHTML = `<div class="empty-notice">Semua pertandingan sudah selesai! 🎉</div>`;
     $("#modalHighlightBtn").style.display = "none";
   } else {
-    $("#modalHighlightBtn").style.display = p.isArchive ? "none" : "flex";
+    $("#modalHighlightBtn").style.display = "flex";
     $("#modalPendingOpponents").innerHTML = p.pendingOpponents.map(o => `
       <div class="opponent-chip" data-goto-player="${esc(o.opponent)}" style="cursor:pointer" title="Klik untuk lihat profil lawan">
         <span class="vs-badge">${o.isHome ? "vs (K)" : "vs (T)"}</span>
@@ -309,7 +336,7 @@ function openPlayerModal(playerName){
           <span class="history-badge ${m.result}">
             ${m.result === 'win' ? 'MENANG' : m.result === 'loss' ? 'KALAH' : 'SERI'}
           </span>
-          ${!p.isArchive ? `<button class="btn-edit-score" data-edit-match="${m.id}" title="Edit Skor (PIN 1203)">✏️ Edit</button>` : ''}
+          <button class="btn-edit-score" data-edit-match="${m.id}" title="Edit Skor (PIN 1203)">✏️ Edit</button>
         </div>
       </div>
     `).join("");
@@ -886,7 +913,7 @@ function renderSeasonSwitcher(){
   if(!select) return;
 
   const currentSeasonName = league?.league?.season || "Season 1";
-  const currentStatus = league?.league?.status || (isSeasonFinished() ? "completed" : "active");
+  const currentStatus = league?.league?.status || (isCurrentSeasonFinished() ? "completed" : "active");
   const statusTag = currentStatus === "draft" ? "Draft" : currentStatus === "completed" ? "Selesai" : "Berjalan";
 
   let html = `<option value="current" ${viewingSeason === "current" ? "selected" : ""}>🏆 ${esc(currentSeasonName)} (${statusTag})</option>`;
@@ -894,8 +921,12 @@ function renderSeasonSwitcher(){
   if(Array.isArray(league?.historySeasons) && league.historySeasons.length > 0){
     html += `<optgroup label="── ARSIP MUSIM SEBELUMNYA ──">`;
     league.historySeasons.forEach((s, idx) => {
-      const champName = s.champion?.name ? `Juara: ${s.champion.name}` : "Selesai";
-      html += `<option value="${idx}" ${viewingSeason === idx ? "selected" : ""}>📜 ${esc(s.season)} (${champName})</option>`;
+      const pendingCount = (s.matches || []).filter(m => !m.played).length;
+      let tag = s.champion?.name ? `Juara: ${s.champion.name}` : "Selesai";
+      if(pendingCount > 0){
+        tag = `Sisa ${pendingCount} Laga`;
+      }
+      html += `<option value="${idx}" ${viewingSeason === idx ? "selected" : ""}>📜 ${esc(s.season)} (${tag})</option>`;
     });
     html += `</optgroup>`;
   }
@@ -965,20 +996,6 @@ function renderMatches(){
     banner.innerHTML = "";
   }
 
-  // Handle Archive Season view
-  if(active.isArchive){
-    $("#matches").innerHTML = `
-      <div class="empty-notice" style="grid-column:1/-1;padding:36px 20px;background:#f8fafc;border-radius:14px;border:1.5px dashed var(--line);text-align:center">
-        <div style="font-size:28px;margin-bottom:8px">📜 🏆</div>
-        <strong style="display:block;font-size:15px;color:var(--navy);margin-bottom:4px">Data Arsip: ${esc(active.season)} Selesai</strong>
-        <p style="margin:0 0 14px;color:var(--muted);font-size:12px">Seluruh pertandingan musim ini telah dimainkan. Anda dapat melihat hasil skor di tab "Riwayat Hasil".</p>
-        <button class="btn accent" id="archiveReturnBtn" style="padding:9px 18px">Kembali ke Musim Berjalan ↗</button>
-      </div>`;
-    const retBtn = $("#archiveReturnBtn");
-    if(retBtn) retBtn.onclick = () => { viewingSeason = "current"; render(); };
-    return;
-  }
-
   // Handle Draft Season view
   if(active.status === "draft"){
     const list = active.matches || [];
@@ -1011,12 +1028,27 @@ function renderMatches(){
     return;
   }
 
-  // Active season: normal match center
+  // Active or Archived season: match center
   const ordered = organizeMatches(active.matches || [], false);
   let list = ordered.filter(m => !m.played);
 
-  if(list.length === 0){
-    const allDone = isSeasonFinished();
+  // If in Archive season and all matches played
+  if(active.isArchive && list.length === 0){
+    $("#matches").innerHTML = `
+      <div class="empty-notice" style="grid-column:1/-1;padding:36px 20px;background:#f8fafc;border-radius:14px;border:1.5px dashed var(--line);text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">📜 🏆</div>
+        <strong style="display:block;font-size:15px;color:var(--navy);margin-bottom:4px">Data Arsip: Semua Pertandingan ${esc(active.season)} Selesai</strong>
+        <p style="margin:0 0 14px;color:var(--muted);font-size:12px">Seluruh pertandingan musim ini telah dimainkan. Anda dapat melihat atau mengedit skor di tab "Riwayat Hasil".</p>
+        <button class="btn accent" id="archiveReturnBtn" style="padding:9px 18px">Kembali ke Musim Berjalan ↗</button>
+      </div>`;
+    const retBtn = $("#archiveReturnBtn");
+    if(retBtn) retBtn.onclick = () => { viewingSeason = "current"; render(); };
+    return;
+  }
+
+  // If current season and all matches played
+  if(!active.isArchive && list.length === 0){
+    const allDone = isCurrentSeasonFinished();
     $("#matches").innerHTML = `
       <div class="empty-notice" style="grid-column:1/-1;padding:35px 20px;background:#fff;border-radius:14px;border:1px dashed var(--line);font-size:13px;text-align:center">
         ${allDone ? `
@@ -1033,7 +1065,16 @@ function renderMatches(){
     return;
   }
 
-  $("#matches").innerHTML = list.map(m => {
+  const archiveNoticeHtml = active.isArchive ? `
+    <div class="archive-match-notice" style="grid-column:1/-1;padding:12px 16px;background:#eff6ff;border-radius:12px;border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+      <div style="font-size:12px;color:#1e40af">
+        <strong>📜 Sisa Pertandingan ${esc(active.season)}:</strong> Masih ada <strong>${list.length} pertandingan</strong> belum tuntas di musim ini. Masukkan skor lalu klik <strong>SIMPAN HASIL</strong> (PIN 1203).
+      </div>
+      <button class="btn ghost btn-sm" id="archiveMatchNoticeReturnBtn" style="padding:5px 12px;font-size:11px;border-color:#3b82f6;color:#1d4ed8">Kembali ke Musim Berjalan ↗</button>
+    </div>
+  ` : '';
+
+  $("#matches").innerHTML = archiveNoticeHtml + list.map(m => {
     const isPlayerMatch = selectedPlayer && (
       m.home.toLowerCase() === selectedPlayer.toLowerCase() ||
       m.away.toLowerCase() === selectedPlayer.toLowerCase()
@@ -1056,6 +1097,9 @@ function renderMatches(){
         <button class="save-score" data-save="${m.id}">SIMPAN HASIL</button>
       </div>`;
   }).join("");
+
+  const retBtn = $("#archiveMatchNoticeReturnBtn");
+  if(retBtn) retBtn.onclick = () => { viewingSeason = "current"; render(); };
 }
 
 /* ==========================================================================
@@ -1085,17 +1129,13 @@ function renderHistory(){
       <div class="history-match-item" data-match-id="${m.id}">
         <div class="history-item-top">
           <span class="history-item-tag played">${active.isArchive ? 'ARSIP' : 'SELESAI'}</span>
-          ${!active.isArchive ? `
-            <button class="btn-edit-score" data-edit-match="${m.id}">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" fill="#fde047" stroke="#d97706" stroke-width="2"/>
-              </svg>
-              Edit Skor
-            </button>
-          ` : `
-            <span style="font-size:10px;font-weight:700;color:#94a3b8">Musim Selesai</span>
-          `}
+          <button class="btn-edit-score" data-edit-match="${m.id}" title="Edit Skor Pertandingan (PIN 1203)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" fill="#fde047" stroke="#d97706" stroke-width="2"/>
+            </svg>
+            Edit Skor
+          </button>
         </div>
         <div class="history-item-matchup">
           <div class="history-side">
@@ -1119,8 +1159,13 @@ function renderHistory(){
 /* ==========================================================================
    SEASON STATUS BANNERS & LIFECYCLE
    ========================================================================== */
-function isSeasonFinished(){
+function isCurrentSeasonFinished(){
   return league && Array.isArray(league.matches) && league.matches.length > 0 && league.matches.every(m => m.played);
+}
+
+function isSeasonFinished(){
+  const active = getActiveSeasonData();
+  return active && Array.isArray(active.matches) && active.matches.length > 0 && active.matches.every(m => m.played);
 }
 
 function renderSeasonBanner(){
@@ -1134,12 +1179,18 @@ function renderSeasonBanner(){
   if(active.isArchive){
     statusBanner.style.display = "block";
     seasonBanner.style.display = "none";
+    const playedCount = (active.matches || []).filter(m => m.played).length;
+    const totalCount = (active.matches || []).length;
+    const isCompleted = totalCount > 0 && playedCount === totalCount;
+
     statusBanner.innerHTML = `
       <div class="season-status-banner archive">
         <div class="status-banner-content">
-          <span class="status-pill archive">📜 ARSIP MUSIM SELESAI</span>
+          <span class="status-pill archive">${isCompleted ? '📜 ARSIP MUSIM SELESAI' : '📜 ARSIP • SISA MATCH DAPAT DITANDINGKAN'}</span>
           <h3>Data Arsip: <strong>${esc(active.season)}</strong></h3>
-          <p>Juara: <strong>${esc(active.champion?.name || '-')}</strong> (${active.champion?.pts || 0} Poin) • Total ${active.matches.length} Pertandingan Tuntas.</p>
+          <p>${isCompleted 
+            ? `Juara: <strong>${esc(active.champion?.name || '-')}</strong> (${active.champion?.pts || 0} Poin) • Total ${totalCount} Pertandingan Tuntas. Riwayat skor tetap dapat diedit dengan PIN 1203.` 
+            : `Progres: <strong>${playedCount} dari ${totalCount} Pertandingan Selesai</strong> (${totalCount - playedCount} sisa match belum dimainkan). Sisa match tetap dapat dimainkan & skor dapat diedit.`}</p>
         </div>
         <div class="status-banner-actions">
           <button class="btn accent btn-sm" id="returnToCurrentSeasonBtn">Kembali ke Musim Berjalan ↗</button>
@@ -1176,7 +1227,7 @@ function renderSeasonBanner(){
   }
 
   // 3. Current season is ACTIVE
-  const finished = isSeasonFinished();
+  const finished = isCurrentSeasonFinished();
   if(finished){
     statusBanner.style.display = "none";
     seasonBanner.style.display = "block";
@@ -1229,10 +1280,6 @@ function renderSeasonBanner(){
    ========================================================================== */
 function promptPinForSave(id){
   const active = getActiveSeasonData();
-  if(active.isArchive){
-    alert("Tidak dapat mengubah skor pada musim arsip.");
-    return;
-  }
   if(active.status === "draft"){
     alert("Musim belum dimulai! Klik 'Start Season' terlebih dahulu.");
     return;
@@ -1249,14 +1296,16 @@ function promptPinForSave(id){
     return;
   }
 
-  const m = league.matches.find(x => x.id === +id);
+  const targetMatches = getActiveSeasonMatches();
+  const m = targetMatches.find(x => x.id === +id);
   if(!m) return;
 
-  pendingSaveMatch = { id: +id, hs: +hs, as: +as };
+  pendingSaveMatch = { id: +id, hs: +hs, as: +as, seasonIndex: viewingSeason };
 
   const desc = $("#pinModalDescription");
   if(desc){
-    desc.textContent = `Simpan hasil ${m.home} (${hs}) vs (${as}) ${m.away}. Masukkan PIN Admin (1203).`;
+    const seasonTag = active.isArchive ? ` (${active.season})` : "";
+    desc.textContent = `Simpan hasil ${m.home} (${hs}) vs (${as}) ${m.away}${seasonTag}. Masukkan PIN Admin (1203).`;
   }
 
   $("#pinInputBox").value = "";
@@ -1284,11 +1333,18 @@ function submitPinForSave(){
   }
 
   if(pendingSaveMatch){
-    const m = league.matches.find(x => x.id === pendingSaveMatch.id);
+    const sIdx = pendingSaveMatch.seasonIndex;
+    const targetMatches = (sIdx === "current" || typeof sIdx !== "number")
+      ? (league?.matches || [])
+      : (league?.historySeasons?.[sIdx]?.matches || []);
+
+    const m = targetMatches.find(x => x.id === pendingSaveMatch.id);
     if(m){
       m.homeScore = pendingSaveMatch.hs;
       m.awayScore = pendingSaveMatch.as;
       m.played = true;
+
+      updateSeasonStandingsAfterMatchChange(sIdx);
       closePinModal();
       persist(`Hasil ${m.home} ${m.homeScore} - ${m.awayScore} ${m.away} berhasil disimpan!`);
     }
@@ -1308,16 +1364,13 @@ function closePinModal(){
    EDIT SCORE MODAL (PIN 1203)
    ========================================================================== */
 function openEditScoreModal(matchId){
-  const active = getActiveSeasonData();
-  if(active.isArchive){
-    alert("Musim ini telah diarsipkan dan berstatus selesai.");
-    return;
-  }
-
-  const m = (league?.matches || []).find(x => x.id === +matchId);
+  const targetMatches = getActiveSeasonMatches();
+  const m = targetMatches.find(x => x.id === +matchId);
   if(!m) return;
 
+  editingMatch = { id: +matchId, seasonIndex: viewingSeason };
   editingMatchId = +matchId;
+
   $("#editHomeTeam").textContent = m.home;
   $("#editHomeAvatar").textContent = initials(m.home);
   $("#editHomeScore").value = m.homeScore;
@@ -1341,12 +1394,13 @@ function closeEditScoreModal(){
   modal.classList.remove("show");
   setTimeout(() => {
     modal.hidden = true;
+    editingMatch = null;
     editingMatchId = null;
   }, 200);
 }
 
 function saveEditedScore(){
-  if(!editingMatchId) return;
+  if(!editingMatch && !editingMatchId) return;
   const hs = $("#editHomeScore").value.trim();
   const as = $("#editAwayScore").value.trim();
   const pin = $("#editScorePin").value.trim();
@@ -1366,11 +1420,19 @@ function saveEditedScore(){
     return;
   }
 
-  const m = (league.matches || []).find(x => x.id === editingMatchId);
+  const sIdx = editingMatch ? editingMatch.seasonIndex : viewingSeason;
+  const targetId = editingMatch ? editingMatch.id : editingMatchId;
+  const targetMatches = (sIdx === "current" || typeof sIdx !== "number")
+    ? (league?.matches || [])
+    : (league?.historySeasons?.[sIdx]?.matches || []);
+
+  const m = targetMatches.find(x => x.id === targetId);
   if(m){
     m.homeScore = +hs;
     m.awayScore = +as;
     m.played = true;
+
+    updateSeasonStandingsAfterMatchChange(sIdx);
     closeEditScoreModal();
     persist(`Skor ${m.home} vs ${m.away} berhasil diperbarui menjadi ${hs} - ${as}!`);
     if(currentModalPlayer){
@@ -1466,8 +1528,8 @@ function openCreateSeasonModal(){
 
   // If current season has completed matches, show recap
   const recapBox = $("#modalChampionRecap");
-  const rows = table();
-  if(rows.length > 0 && isSeasonFinished()){
+  const rows = computeTableFor(league?.league?.teams || [], league?.matches || []);
+  if(rows.length > 0 && isCurrentSeasonFinished()){
     recapBox.style.display = "block";
     $("#modalSeasonCompletedName").textContent = `${currentSeasonName} Selesai (${league.matches.length} Pertandingan)`;
     const c1 = rows[0], c2 = rows[1], c3 = rows[2];

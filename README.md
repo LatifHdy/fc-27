@@ -27,6 +27,10 @@ Navigasi tab horizontal bergaya modern dengan ikon multi-color dan badge indikat
   - **🟡 DRAFT**: Status musim baru saat dibuat. Admin dapat menambah pemain baru ke liga sebelum kompetisi dimulai (`+ Tambah Pemain`). Jadwal round-robin otomatis dihitung ulang.
   - **🚀 START SEASON**: Tombol untuk memulai musim (memerlukan PIN `1203`). Mengubah status menjadi **🟢 AKTIF / BERJALAN** dan membuka akses input skor di Match Center.
   - **🏁 SELESAIKAN MUSIM**: Mengarsipkan musim saat ini ke `historySeasons` dan membuka form pembuatan musim baru.
+- **Sisa Pertandingan & Edit Skor di Musim Sebelumnya**:
+  - Pertandingan tunda atau sisa match yang belum dimainkan pada musim-musim terdahulu (`historySeasons`) **tetap dapat ditandingkan** langsung melalui Match Center (input skor dan klik **SIMPAN HASIL** dengan PIN `1203`).
+  - Riwayat skor pertandingan yang telah selesai di musim sebelumnya **tetap dapat diedit** melalui tab **Riwayat Hasil** atau modal profil pemain dengan verifikasi PIN `1203`.
+  - Poin klasemen, selisih gol, podium juara, dan status musim arsip akan **otomatis dihitung ulang** secara instan dan tersimpan langsung ke Firebase Realtime Database.
 - **⚡ Buat Season Baru & Pop-up Partisipasi Pemain**:
   - Tombol **"⚡ Buat Season Baru"** di header membuka modal interaktif.
   - **Daftar Checkbox Pemain**: Memilih siapa saja pemain yang ikut serta di musim baru dengan tombol cepat "Pilih Semua" dan "Kosongkan".
