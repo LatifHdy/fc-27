@@ -1021,11 +1021,6 @@ main {
   color: var(--navy);
 }
 
-.match.pending-swas {
-  background: #fffbeb;
-  border-color: #fde68a;
-}
-
 /* Highlighted & Dimmed Matches */
 .highlight-banner {
   display: flex;

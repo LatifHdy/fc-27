@@ -135,23 +135,15 @@ function shuffle(array){
   return a;
 }
 
-function isSwasMatch(m){
-  const h = (m.home || "").toLowerCase().trim();
-  const a = (m.away || "").toLowerCase().trim();
-  return h === "swas" || a === "swas";
-}
-
 function organizeMatches(matches, doShuffle = false){
   const played = matches.filter(m => m.played);
-  let unplayedOthers = matches.filter(m => !m.played && !isSwasMatch(m));
-  let unplayedSwas = matches.filter(m => !m.played && isSwasMatch(m));
+  let unplayed = matches.filter(m => !m.played);
 
   if (doShuffle) {
-    unplayedOthers = shuffle(unplayedOthers);
-    unplayedSwas = shuffle(unplayedSwas);
+    unplayed = shuffle(unplayed);
   }
 
-  return [...played, ...unplayedOthers, ...unplayedSwas];
+  return [...played, ...unplayed];
 }
 
 function randomizeMatches(){
@@ -161,7 +153,7 @@ function randomizeMatches(){
     return;
   }
   league.matches = organizeMatches(league.matches, true);
-  persist("Jadwal pertandingan yang belum main berhasil diacak (pertandingan swas diletakkan di akhir).");
+  persist("Jadwal pertandingan yang belum main berhasil diacak.");
 }
 
 /* ==========================================================================
@@ -993,7 +985,7 @@ function renderMatches(){
         </div>
       </div>
       ${list.map(m => `
-        <div class="match ${isSwasMatch(m) ? 'pending-swas' : ''}" style="opacity:0.85">
+        <div class="match" style="opacity:0.85">
           <div class="side">${esc(m.home)}</div>
           <div class="scorebox">
             <span style="font-size:12px;font-weight:800;color:#94a3b8">DRAFT</span>
@@ -1015,12 +1007,6 @@ function renderMatches(){
   // Active season: normal match center
   const ordered = organizeMatches(active.matches || [], false);
   let list = ordered.filter(m => !m.played);
-
-  if(filter === "others"){
-    list = list.filter(m => !isSwasMatch(m));
-  } else if(filter === "swas"){
-    list = list.filter(m => isSwasMatch(m));
-  }
 
   if(list.length === 0){
     const allDone = isSeasonFinished();
@@ -1049,7 +1035,7 @@ function renderMatches(){
     const isDimmed = selectedPlayer && !isPlayerMatch;
 
     return `
-      <div class="match ${isHighlighted ? 'is-highlighted' : ''} ${isDimmed ? 'is-dimmed' : ''} ${isSwasMatch(m) ? 'pending-swas' : ''}">
+      <div class="match ${isHighlighted ? 'is-highlighted' : ''} ${isDimmed ? 'is-dimmed' : ''}">
         <div class="side ${selectedPlayer && m.home.toLowerCase() === selectedPlayer.toLowerCase() ? 'highlight-player' : ''}">${esc(m.home)}</div>
         <div class="scorebox">
           <div class="scoreline">

@@ -260,9 +260,9 @@
       "id": 22,
       "home": "Teguh",
       "away": "Fajrul",
-      "homeScore": null,
-      "awayScore": null,
-      "played": false
+      "homeScore": 5,
+      "awayScore": 1,
+      "played": true
     },
     {
       "id": 15,
