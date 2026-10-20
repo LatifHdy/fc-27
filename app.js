@@ -1597,7 +1597,6 @@ async function executeCreateSeason(){
 
   viewingSeason = "current";
   closeCreateSeasonModal();
-  downloadJSON();
 
   persist(`Musim baru "${seasonName}" berhasil dibuat dengan status DRAFT! Anda masih dapat menambah pemain sebelum klik Start Season.`);
 }
@@ -1697,19 +1696,6 @@ function promptFinishSeason(){
   }, 400);
 }
 
-function backupSeasonJson(){
-  const active = getActiveSeasonData();
-  const seasonTag = (active.season || "season").toLowerCase().replace(/[^a-z0-9]/g, "-");
-  const filename = `liga-${seasonTag}-final.json`;
-  const blob = new Blob([JSON.stringify(league, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast(`Backup ${filename} berhasil diunduh.`);
-}
-
 /* ==========================================================================
    PERSISTENCE & FIREBASE REALTIME DATABASE
    ========================================================================== */
@@ -1743,15 +1729,6 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2800);
-}
-
-function downloadJSON(){
-  const blob = new Blob([JSON.stringify(league, null, 2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "liga.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
 }
 
 /* ==========================================================================
@@ -1868,7 +1845,6 @@ function initModalsAndEvents(){
   $("#nextSeasonModal").addEventListener("click", e => {
     if(e.target === $("#nextSeasonModal")) closeCreateSeasonModal();
   });
-  $("#backupCurrentSeasonBtn").addEventListener("click", backupSeasonJson);
 
   // Player selection checklist events
   $("#participatingPlayersList").addEventListener("click", e => {
