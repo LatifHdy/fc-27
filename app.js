@@ -146,14 +146,21 @@ function organizeMatches(matches, doShuffle = false){
   return [...played, ...unplayed];
 }
 
-function randomizeMatches(){
+async function randomizeMatches(){
   const active = getActiveSeasonData();
   if(active.isArchive){
     alert("Musim arsip tidak dapat diacak.");
     return;
   }
+
+  const unplayed = (league.matches || []).filter(m => !m.played);
+  if(unplayed.length === 0){
+    toast("Semua pertandingan sudah selesai dimainkan, tidak ada jadwal untuk diacak.");
+    return;
+  }
+
   league.matches = organizeMatches(league.matches, true);
-  persist("Jadwal pertandingan yang belum main berhasil diacak.");
+  await persist("🎲 Urutan jadwal pertandingan berhasil diacak dan tersimpan ke Firebase!");
 }
 
 /* ==========================================================================
@@ -1703,6 +1710,15 @@ async function persist(message="Hasil pertandingan tersimpan."){
   normalizeLeagueData();
   localStorage.setItem("fc27-liga", JSON.stringify(league));
   render();
+
+  if(!firebaseDb && typeof firebase !== "undefined" && typeof firebaseConfig !== "undefined" && firebaseConfig.apiKey){
+    try {
+      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      firebaseDb = firebase.database();
+    } catch(e){
+      console.warn("Firebase auto-init in persist failed:", e);
+    }
+  }
 
   if(firebaseDb){
     try {
